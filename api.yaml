@@ -1,0 +1,363 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Courses Service"
+  
+host: "localhost:5000"
+basePath: "/v2"
+schemes:
+- "https"
+- "http"
+
+paths:
+
+
+  /courses:
+    get:
+      tags:
+        - "courses"
+      summary: "Obtener los cursos para un usuario"
+      parameters:
+        - $ref: '#/parameters/authorization'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Course'
+              
+              
+  /courses/{courseId}:
+    get:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "courses"
+      responses:
+        200:
+          description: OK
+          schema:
+           $ref: '#/definitions/Course'
+           
+    patch:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "courses"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Course'
+          
+    delete:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "courses"
+      responses:
+        200:
+          description: OK
+  
+  
+  /courses/{courseId}/users:
+    get:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "courses"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/User'
+        
+    patch:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "courses"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/User'
+          
+    
+  /courses/{courseId}/guides:
+    get:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "guides"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Guide'
+              
+    patch:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "guides"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Guide'
+          
+          
+  /courses/{courseId}/guides/{guideId}:
+    get:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "guides"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Guide'
+            
+    patch:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "guides"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Guide'
+            
+    delete:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "guides"
+      responses:
+        200:
+          description: OK
+  
+  
+  /courses/{courseId}/guides/{guideId}/exercises:
+    get:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "exercises"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Guide'
+          
+    patch:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "exercises"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Guide'
+          
+          
+  /courses/{courseId}/guides/{guideId}/exercises/{exerciseId}:
+    get:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/exerciseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "exercises"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Guide'
+          
+    patch:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/exerciseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "exercises"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Guide'
+            
+    delete:
+      parameters:
+        - $ref: '#/parameters/courseId'
+        - $ref: '#/parameters/guideId'
+        - $ref: '#/parameters/exerciseId'
+        - $ref: '#/parameters/authorization'
+      tags:
+        - "exercises"
+      responses:
+        200:
+          description: OK
+          
+  
+
+definitions:
+  Course:
+    type: "object"
+    properties:
+      id: 
+        type: "string"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      creation_date:
+        type: "string"
+        format: "date"
+      creator:
+       type: "string"
+      guides:
+        type: "array"
+        items:
+          type: "string" # guide ids
+      users:
+        type: "array"
+        items:
+          $ref: '#/definitions/User'
+  
+  User:
+    type: "object"
+    properties:
+      id: 
+        type: "string"
+      role: 
+        type: "string"
+  
+  Guide:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      exercises:
+        type: "array"
+        items:
+          type: "string" #exercises id
+
+  Exercise:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      type:
+        type: "string" 
+        description: "derivative/integral"
+      difficulty:
+        type: "string" 
+        description: "easy, medium or hard"
+      input:
+        type: "string"
+      theorems:
+        type: "array"
+        items:
+          $ref: '#/definitions/Theorem'
+    
+  Theorem:
+    type: "object"
+    properties:
+      id: 
+        type: "string"
+      name:
+        type: "string"
+      left:
+        type: "string"
+      right:
+        type: "string"
+      conditions:
+        type: "array"
+        items:
+          $ref: '#/definitions/Condition'
+          
+  Condition:
+    type: "object"
+    properties:
+      key: 
+        type: "string"
+      value: 
+        type: "string"
+      
+      
+  
+# define reusable parameters:
+parameters:
+  authorization:
+    in: "header"
+    name: "header"
+    required: true
+    description: "header de autenticacion"
+    type: "string"
+    default: "X-Authorization: {token de autorizacion}"
+  courseId:
+    name: "courseId"
+    in: "path"
+    required: true
+    type: "integer"
+    format: "int64"
+    
+  guideId:
+    name: "guideId"
+    in: "path"
+    required: true
+    type: "integer"
+    format: "int64"
+    
+  exerciseId:
+    name: "exerciseId"
+    in: "path"
+    required: true
+    type: "integer"
+    format: "int64"
+
+      
