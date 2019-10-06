@@ -6,11 +6,10 @@ const bodyParser = require('body-parser');
 const configs = require('../configs');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const initialMiddleware = require('./middlewares/initialMiddleware');
-const authMiddleware = require('./middlewares/authMiddleware');
 const requestLoggerMiddleware = require('./middlewares/requestLoggerMiddleware');
 
 const statusController = require('./controllers/statusController');
-const usersController = require('./controllers/usersController');
+const coursesController = require('./controllers/coursesController');
 
 const app = express();
 const { port } = configs.app;
@@ -24,12 +23,19 @@ app.use(requestLoggerMiddleware);
 router.get('/ping', (req, res) => statusController.ping(req, res));
 
 router.use(initialMiddleware);
-router.use(authMiddleware);
 
-// Users
-router.get('/login', usersController.login);
-router.post('/signup', usersController.signup);
-router.get('/users/:userId/profile', usersController.getUser);
+// Courses
+router.get('/courses', coursesController.getCourses);
+router.get('/courses/{courseId}', coursesController.getCourse);
+router.get('/courses/{courseId}/users', coursesController.getCourses);
+router.get('/courses/{courseId}/guides', coursesController.getCourses);
+router.get('/courses/{courseId}/guides/{guideId}', coursesController.getCourses);
+router.get('/courses/{courseId}/guides/{guideId}/exercises', coursesController.getCourses);
+router.get('/courses/{courseId}', coursesController.getCourses);
+router.get('/courses/{courseId}', coursesController.getCourses);
+router.get('/courses/{courseId}', coursesController.getCourses);
+router.get('/courses/{courseId}', coursesController.getCourses);
+
 
 app.use(router);
 

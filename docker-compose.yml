@@ -1,0 +1,22 @@
+version: '3'
+services:
+  course-service:
+    build: .
+    depends_on:
+      - db
+    ports:
+     - "5001:5001"
+    command:
+      node src/app.js
+    volumes:
+      - .:/code
+  
+  db:
+    image: "postgres:11"
+    container_name: "my_postgres"
+    ports:
+      - "54320:5432"
+    volumes:
+      - my_dbdata:/var/lib/postgresql/data
+volumes:
+  my_dbdata:

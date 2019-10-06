@@ -2,7 +2,7 @@ module.exports = {
   app: {
     protocol: 'http',
     hostname: 'localhost',
-    port: '5000'
+    port: '5001'
   },
   db: {
     client: 'pg',
@@ -11,7 +11,7 @@ module.exports = {
       host: '127.0.0.1',
       user: 'postgres',
       password: 'postgres',
-      database: 'users_service'
+      database: 'courses_service'
     }
   }
 };
