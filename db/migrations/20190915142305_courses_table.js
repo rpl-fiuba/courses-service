@@ -13,6 +13,11 @@ exports.up = (knex) => {
       role CHARACTER VARYING(128) NOT NULL
     )
 
+    CREATE TABLE course_guides(
+      course_id CHARACTER VARYING(128) NOT NULL,
+      guide_id CHARACTER VARYING(128) NOT NULL
+    )
+
     CREATE TABLE guides(
       guide_id CHARACTER VARYING(128) NOT NULL,
       description CHARACTER VARYING(128) NOT NULL,
@@ -33,6 +38,5 @@ exports.down = (knex) => {
     DROP TABLE guides;
     DROP TABLE course_users;
     DROP TABLE guide_exercise;`;
-
   return knex.raw(query);
 };

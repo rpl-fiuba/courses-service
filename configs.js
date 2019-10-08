@@ -11,7 +11,10 @@ module.exports = {
       host: '127.0.0.1',
       user: 'postgres',
       password: 'postgres',
-      database: 'courses_service'
+      database: 'courses'
     }
+  },
+  coursesConfig: {
+    pageSize: 40
   }
 };
