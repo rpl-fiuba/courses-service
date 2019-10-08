@@ -13,15 +13,15 @@ const getCourses = async ({ pageNumber }) => {
   return knex('courses')
     .select()
     .returning('*')
-    .limit(pageSize)
-    .offset(pageSize * pageNumber)
     .then(processDbResponse)
     .then((response) => {
+      console.log(response)
       if (!response) {
         throw new createError.NotFound('Courses not found');
       }
       return response;
     })
+    .catch(console.log)
 };
 
 

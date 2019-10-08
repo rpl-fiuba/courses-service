@@ -7,7 +7,9 @@ const coursesService = require('../services/coursesService')
  * Get courses.
  */
 const getCourses = async (req, res) => {
-  logger.onLog(coursesService.getCourses({pageNumber: 1}))
+  coursesService.getCourses({pageNumber: 1}).then(
+    logger.onLog
+  ).catch(logger.onError)
   return res.status(200).json({});
 };
 

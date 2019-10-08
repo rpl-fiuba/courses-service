@@ -8,7 +8,7 @@ module.exports = {
     client: 'pg',
     version: '10.10',
     connection: {
-      host: '127.0.0.1',
+      host: 'localhost',
       user: 'postgres',
       password: 'postgres',
       database: 'courses'
