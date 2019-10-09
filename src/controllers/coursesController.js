@@ -7,10 +7,12 @@ const coursesService = require('../services/coursesService')
  * Get courses.
  */
 const getCourses = async (req, res) => {
-  coursesService.getCourses({pageNumber: 1}).then(
-    logger.onLog
-  ).catch(logger.onError)
-  return res.status(200).json({});
+  let page = req.query.page;
+  let limit = req.query.limit;
+
+  let courses = await coursesService.getCourses({page, limit})
+
+  return res.status(200).json(courses);
 };
 
 const addCourse = async (req, res) => {

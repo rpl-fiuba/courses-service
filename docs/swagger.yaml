@@ -18,6 +18,8 @@ paths:
       summary: "Obtener los cursos para un usuario"
       parameters:
         - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/pageNumber'
+        - $ref: '#/parameters/limit'
       responses:
         200:
           description: OK
@@ -358,5 +360,21 @@ parameters:
     required: true
     type: "integer"
     format: "int64"
+  
+  pageNumber:
+    name: "page"
+    in: "path"
+    type: "integer"
+    format: "int64"
+    description: "Numero de pagina que se desea obtener"
+    default: "page=1"
+
+  limit:
+    name: "limit"
+    in: "path"
+    type: "integer"
+    format: "int64"
+    description: "Cantidad de elementos que se desean obtener"
+    default: "limit=10"
 
       

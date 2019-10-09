@@ -1,7 +1,7 @@
 const courses = require('../databases/coursesDb')
 
-const getCourses = ({pageNumber}) => {
-  return courses.getCourses({pageNumber})
+const getCourses = ({page}) => {
+  return courses.getCourses({page, limit})
 }
 
 module.exports = {

@@ -8,7 +8,8 @@ const knex = require('knex')(configs.db); // eslint-disable-line
  * Get courses.
  *
  */
-const getCourses = async ({ pageNumber }) => {
+const getCourses = async ({ page, limit }) => {
+  
   let pageSize = configs.coursesConfig.pageSize;
   return knex('courses')
     .select()
