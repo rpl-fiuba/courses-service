@@ -6,7 +6,22 @@ exports.seed = async (knex) => {
       course_id: "coursito",
       name: "cursito",
       description: "Hola",
-      creator: "Diego"
+    },
+  ]);
+  await knex('course_users').del();
+  await knex('course_users').insert([
+    {
+      course_id: "coursito",
+      user_id: "Diego",
+      role: "admin"
+    },
+  ]);
+  await knex('guides').del();
+  await knex('guides').insert([
+    {
+      course_id: "coursito",
+      guide_id: "guia_cursito",
+      description: "Curso 1",
     },
   ]);
 };
