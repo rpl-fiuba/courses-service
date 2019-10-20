@@ -3,7 +3,7 @@ exports.seed = async (knex) => {
   await knex('courses').del();
   await knex('courses').insert([
     {
-      course_id: 'coursename',
+      id: 'coursename',
       name: 'course name',
       description: 'course description',
     },
