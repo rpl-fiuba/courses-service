@@ -1,20 +1,48 @@
 const createError = require('http-errors');
 
-const { processDbResponse, snakelize } = require('../utils/dbUtils');
+const { processDbResponse } = require('../utils/dbUtils');
 const configs = require('../../configs');
 const knex = require('knex')(configs.db); // eslint-disable-line
 
+const COURSES_TABLE = 'courses';
+const COURSE_USERS_TABLE = 'course_users';
 /**
  * Get courses.
  *
  */
-const getCourses = async ({ page, limit }) => {
 
-  let pageSize = configs.coursesConfig.pageSize;
+const getCoursesByUser = async ({
+  userId,
+  page,
+  limit
+}) => knex(COURSE_USERS_TABLE)
+  .select()
+  .where({ user_id: userId })
+  .returning('*')
+  .offset(page)
+  .limit(limit)
+  .then(processDbResponse)
+  .then((response) => {
+    if (!response) {
+      throw new createError.NotFound('Courses not found');
+    }
+    if (!response.length) {
+      return [response];
+    }
+    return response;
+  });
 
-  return knex('courses')
+const getCourses = async ({
+  page,
+  limit
+}) => {
+  const { pageSize } = configs.coursesConfig.pageSize;
+  const offset = limit !== null && limit !== undefined ? limit : pageSize;
+  return knex(COURSES_TABLE)
     .select()
     .returning('*')
+    .offset(page)
+    .limit(offset)
     .then(processDbResponse)
     .then((response) => {
       console.log(response);
@@ -22,18 +50,26 @@ const getCourses = async ({ page, limit }) => {
         throw new createError.NotFound('Courses not found');
       }
       return response;
-    })
-    .catch(console.log);
+    });
 };
 
-const newCourse = ({ trx, name, description }) => {
-  const id = name.toLowerCase().replace(' ', '');
-  return trx.insert({
-    id,
-    name,
-    description,
-  }).into('courses');
-};
+const getCourse = async ({ id }) => knex(COURSES_TABLE)
+  .select()
+  .where({ id })
+  .returning('*')
+  .first();
+
+const newCourse = ({
+  trx,
+  name,
+  description,
+  courseId,
+}) => trx.insert({
+  id: courseId,
+  name,
+  description,
+})
+  .into('courses');
 
 
 const createCourseCreator = ({
@@ -42,8 +78,8 @@ const createCourseCreator = ({
   creatorId,
 }) => trx
   .insert({
-    userId: creatorId,
-    courseId,
+    user_id: creatorId,
+    course_id: courseId,
     role: 'admin'
   }).into('course_users');
 
@@ -55,10 +91,23 @@ const addCourse = async ({
   creatorId,
 }) => {
   const trx = await knex.transaction();
-  newCourse({ trx, name, description })
-    .then(() => createCourseCreator({ trx, courseId, creatorId }));
+  await newCourse({
+    trx,
+    name,
+    description,
+    courseId,
+  });
+  await createCourseCreator({
+    trx,
+    courseId,
+    creatorId,
+  });
+  await trx.commit();
 };
 
 module.exports = {
-  getCourses
+  getCourses,
+  addCourse,
+  getCoursesByUser,
+  getCourse,
 };

@@ -1,32 +1,42 @@
 const createError = require('http-errors');
 const expressify = require('expressify')();
-const logger = require('../utils/logger.js');
+// const logger = require('../utils/logger.js');
 const coursesService = require('../services/coursesService');
 
 /**
  * Get courses.
  */
 const getCourses = async (req, res) => {
-  const { page, limit } = req.query;
+  let { page, limit } = req.query;
+  const { authorization } = req.headers;
 
-  const courses = await coursesService.getCourses({ page, limit });
+  // TODO: default values
+  page = !page ? 0 : page;
+  limit = !limit ? 10 : limit;
+
+  if (!authorization) {
+    return Promise.reject(createError.Unauthorized());
+  }
+
+  const courses = await coursesService.getCourses({ page, limit, userToken: authorization });
 
   return res.status(200).json(courses);
 };
 
 const addCourse = async (req, res) => {
-
-  const { context } = req;
+  const { authorization } = req.headers;
   const { name, description } = req.body;
-  const { email, id } = context.googleProfile;
-
   // TODO: validar el rol del usuario.
+
+  if (!authorization) {
+    return Promise.reject(createError.Unauthorized());
+  }
 
   if (!name || !description) {
     return Promise.reject(createError.BadRequest('name or description have not been provided'));
   }
 
-  const creatorId = id;
+  const creatorId = authorization;
   await coursesService.addCourse({
     name,
     description,
@@ -36,27 +46,27 @@ const addCourse = async (req, res) => {
   return res.status(201).json({});
 };
 
-const updateCourse = async (req, res) => {
-  return res.status(200).json({});
-};
+// const updateCourse = async (req, res) => {
+//   return res.status(200).json({});
+// };
 
-const updateCourseUsers = async (req, res) => {
-  return res.status(200).json({});
-};
+// const updateCourseUsers = async (req, res) => {
+//   return res.status(200).json({});
+// };
 
-const getCourseUsers = async (req, res) => {
-  return res.status(200).json({});
-};
+// const getCourseUsers = async (req, res) => {
+//   return res.status(200).json({});
+// };
 
-const deleteCourse = async (req, res) => {
-  return res.status(200).json({});
-};
+// const deleteCourse = async (req, res) => {
+//   return res.status(200).json({});
+// };
 
 module.exports = expressify({
   getCourses,
   addCourse,
-  updateCourse,
-  updateCourseUsers,
-  getCourseUsers,
-  deleteCourse,
+  // updateCourse,
+  // updateCourseUsers,
+  // getCourseUsers,
+  // deleteCourse,
 });

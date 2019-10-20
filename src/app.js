@@ -46,7 +46,8 @@ router.post('/courses', coursesController.addCourse);
 // router.post('/courses/{courseId}/guides/{guideId}/exercises', coursesController.getCourses);
 
 // // Exercises Service has the rest of the logic
-// router.delete('/courses/{courseId}/guides/{guideId}/exercises/{exerciseId}', coursesController.getCourses);
+// router.delete('/courses/{courseId}/guides/{guideId}/exercises/{exerciseId}',
+// coursesController.getCourses);
 
 
 app.use(router);

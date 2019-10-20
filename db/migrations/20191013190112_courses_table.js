@@ -1,6 +1,5 @@
 exports.up = (knex) => {
   const query = `
-
     create type user_role as enum('student', 'professor', 'admin');
 
     CREATE TABLE IF NOT EXISTS courses(

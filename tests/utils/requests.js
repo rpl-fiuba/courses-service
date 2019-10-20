@@ -10,10 +10,9 @@ const status = () => {
   return fetch(statusUrl);
 };
 
-const login = async ({ token }) => {
-  const profileUrl = `${baseUrl}/login`;
-
-  const response = await fetch(profileUrl, {
+const getCourses = async ({ token }) => {
+  const coursesUrl = `${baseUrl}/courses`;
+  const response = await fetch(coursesUrl, {
     headers: {
       authorization: token
     }
@@ -21,28 +20,16 @@ const login = async ({ token }) => {
   return { status: response.status, body: await response.json() };
 };
 
-const signup = async ({ token, userMetadata }) => {
-  const profileUrl = `${baseUrl}/signup`;
-
-  const response = await fetch(profileUrl, {
-    method: 'post',
-    body: JSON.stringify(userMetadata),
+const addCourse = async ({ token, name, description }) => {
+  const addCourseUrl = `${baseUrl}/courses`;
+  const data = { name, description };
+  const response = await fetch(addCourseUrl, {
+    method: 'POST',
     headers: {
       authorization: token,
-      'Content-Type': 'application/json'
-    }
-  });
-  return { status: response.status, body: await response.json() };
-};
-
-
-const getProfile = async ({ userId, token }) => {
-  const profileUrl = `${baseUrl}/users/${userId}/profile`;
-
-  const response = await fetch(profileUrl, {
-    headers: {
-      authorization: token
-    }
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
   });
   return { status: response.status, body: await response.json() };
 };
@@ -57,9 +44,9 @@ function errorWrapper(funct) {
   };
 }
 
+
 module.exports = {
-  signup: errorWrapper(signup),
-  login: errorWrapper(login),
-  getProfile: errorWrapper(getProfile),
-  status: errorWrapper(status)
+  status: errorWrapper(status),
+  getCourses: errorWrapper(getCourses),
+  addCourse: errorWrapper(addCourse),
 };
