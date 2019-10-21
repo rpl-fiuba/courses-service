@@ -4,6 +4,7 @@ const { processDbResponse } = require('../utils/dbUtils');
 const configs = require('../../configs');
 const knex = require('knex')(configs.db); // eslint-disable-line
 
+
 const COURSES_TABLE = 'courses';
 const COURSE_USERS_TABLE = 'course_users';
 /**
@@ -105,9 +106,17 @@ const addCourse = async ({
   await trx.commit();
 };
 
+const addUserToCourse = async ({ userId, courseId, role }) => knex(COURSE_USERS_TABLE)
+  .insert({
+    user_id: userId,
+    course_id: courseId,
+    role,
+  });
+
 module.exports = {
   getCourses,
   addCourse,
   getCoursesByUser,
   getCourse,
+  addUserToCourse,
 };

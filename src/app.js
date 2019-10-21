@@ -28,11 +28,13 @@ router.get('/courses', coursesController.getCourses);
 router.post('/courses', coursesController.addCourse);
 
 // //TODO
-// router.get('/courses/{courseId}', coursesController.getCourse);
+router.get('/courses/:courseId', coursesController.getCourse);
 // router.patch('/courses/{courseId}', coursesController.getCourse);
-// router.delete('/courses/{courseId}', coursesController.getCourse);
+router.delete('/courses/{courseId}', coursesController.getCourse);
+
 // router.get('/courses/{courseId}/users', coursesController.getCourses);
 // router.post('/courses/{courseId}/users', coursesController.getCourses);
+
 // router.delete('/courses/{courseId}/users/{userId}', coursesController.getCourses);
 // router.patch('/courses/{courseId}/users/{userId}', coursesController.getCourses);
 

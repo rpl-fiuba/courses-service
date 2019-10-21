@@ -23,6 +23,10 @@ const getCourses = async (req, res) => {
   return res.status(200).json(courses);
 };
 
+const getCourse = async (req, res) => res.status(200)
+  .json(await coursesService.getCourse({ id: req.params.courseId }));
+
+
 const addCourse = async (req, res) => {
   const { authorization } = req.headers;
   const { name, description } = req.body;
@@ -50,9 +54,22 @@ const addCourse = async (req, res) => {
 //   return res.status(200).json({});
 // };
 
-// const updateCourseUsers = async (req, res) => {
-//   return res.status(200).json({});
-// };
+const addUserToCourse = async (req, res) => {
+  const { courseId, userId } = req.body;
+  const { authorization } = req.headers;
+
+  if (!authorization) {
+    return Promise.reject(createError.Unauthorized());
+  }
+
+  if (!courseId || !userId) {
+    return Promise.reject(createError.BadRequest('courseId or userId not provided'));
+  }
+
+  await coursesService.addUserToCourse({ userId, courseId });
+
+  return res.status(201).json({});
+};
 
 // const getCourseUsers = async (req, res) => {
 //   return res.status(200).json({});
@@ -65,6 +82,8 @@ const addCourse = async (req, res) => {
 module.exports = expressify({
   getCourses,
   addCourse,
+  getCourse,
+  addUserToCourse,
   // updateCourse,
   // updateCourseUsers,
   // getCourseUsers,

@@ -21,7 +21,15 @@ const addCourse = async ({ description, name, creatorId }) => {
   });
 };
 
+const addUserToCourse = async ({
+  userId,
+  courseId,
+  role
+}) => courses.addUserToCourse({ userId, courseId, role });
+
 module.exports = {
   getCourses,
   addCourse,
+  getCourse,
+  addUserToCourse,
 };

@@ -1,3 +1,8 @@
+const resolveDbHost = () => {
+  const { DOCKER } = process.env;
+  return DOCKER ? 'db' : 'localhost';
+};
+
 module.exports = {
   app: {
     protocol: 'http',
@@ -8,7 +13,7 @@ module.exports = {
     client: 'pg',
     version: '10.10',
     connection: {
-      host: 'localhost',
+      host: resolveDbHost(),
       user: 'postgres',
       password: 'postgres',
       database: 'courses'

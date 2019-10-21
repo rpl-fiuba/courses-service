@@ -7,12 +7,14 @@ services:
     ports:
      - "5001:5001"
     command:
-      node src/app.js
+      node src/app
     volumes:
       - .:/code
     links:
       - db
-  
+    environment:
+      - DOCKER=true
+
   db:
     image: "postgres:11"
     container_name: "courses_postgres"
