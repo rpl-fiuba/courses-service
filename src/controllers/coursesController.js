@@ -23,9 +23,22 @@ const getCourses = async (req, res) => {
   return res.status(200).json(courses);
 };
 
-const getCourse = async (req, res) => res.status(200)
-  .json(await coursesService.getCourse({ id: req.params.courseId }));
+const getCourse = async (req, res) => {
+  const { courseId } = req.params;
+  const { authorization } = req.headers;
 
+  if (!authorization) {
+    return Promise.reject(createError.NotAuthorized());
+  }
+
+  const course = await coursesService.getCourse({ id: courseId });
+
+  if (!course) {
+    return Promise.reject(createError.NotFound(`Course with id: ${courseId}`));
+  }
+
+  return res.status(200).json(course);
+};
 
 const addCourse = async (req, res) => {
   const { authorization } = req.headers;
@@ -79,6 +92,22 @@ const addUserToCourse = async (req, res) => {
 //   return res.status(200).json({});
 // };
 
+const deleteCourse = async (req, res) => {
+  const { courseId } = req.params;
+  const { authorization } = req.headers;
+
+  if (!courseId) {
+    return Promise.reject(createError.BadRequest('course id not provided'));
+  }
+  if (!authorization) {
+    return Promise.reject(createError.Unauthorized());
+  }
+
+  await coursesService.deleteCourse({ id: courseId });
+
+  return res.status(200).json({});
+};
+
 module.exports = expressify({
   getCourses,
   addCourse,
@@ -87,5 +116,5 @@ module.exports = expressify({
   // updateCourse,
   // updateCourseUsers,
   // getCourseUsers,
-  // deleteCourse,
+  deleteCourse,
 });

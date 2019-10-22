@@ -28,7 +28,7 @@ describe('Get courses', () => {
           description: 'course description 1',
         },
       ];
-      addThreeMocks();
+      await addThreeMocks();
     });
 
     beforeEach(async () => {

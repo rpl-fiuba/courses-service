@@ -26,6 +26,9 @@ const getCourses = async ({ token }) => doRequest({
 
 const deleteCourse = async ({ token, id }) => doRequest({
   requestUrl: `${baseUrl}/courses/${id}`,
+  params: {
+    method: 'DELETE'
+  },
   token,
 });
 

@@ -113,10 +113,25 @@ const addUserToCourse = async ({ userId, courseId, role }) => knex(COURSE_USERS_
     role,
   });
 
+const deleteCourse = async ({ id }) => {
+  const trx = await knex.transaction();
+  // TODO: delete on cascade?
+  await trx.delete()
+    .from(COURSES_TABLE)
+    .where({ id });
+
+  await trx.delete()
+    .from(COURSE_USERS_TABLE)
+    .where({ course_id: id });
+
+  await trx.commit();
+};
+
 module.exports = {
   getCourses,
   addCourse,
   getCoursesByUser,
   getCourse,
   addUserToCourse,
+  deleteCourse,
 };

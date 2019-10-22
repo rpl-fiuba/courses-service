@@ -27,9 +27,12 @@ const addUserToCourse = async ({
   role
 }) => courses.addUserToCourse({ userId, courseId, role });
 
+const deleteCourse = async ({ id }) => courses.deleteCourse({ id });
+
 module.exports = {
   getCourses,
   addCourse,
   getCourse,
   addUserToCourse,
+  deleteCourse,
 };

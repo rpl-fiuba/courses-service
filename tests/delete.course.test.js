@@ -13,30 +13,26 @@ describe('Delete course', () => {
   before(() => cleanDb());
   afterEach(() => cleanDb());
   describe('When there are courses', () => {
-    let expectedCourses;
+    let courseToDelete;
     // Set up database
     beforeEach(async () => {
-      expectedCourses = [
-        {
-          id: 'coursename2',
-          name: 'course name 2',
-          description: 'course description 2',
-        },
-        {
-          id: 'coursename1',
-          name: 'course name 1',
-          description: 'course description 1',
-        },
-      ];
-      addThreeMocks();
+      courseToDelete = {
+        id: 'coursename2',
+        name: 'course name 2',
+        description: 'course description 2',
+      };
+      await addThreeMocks();
     });
 
     beforeEach(async () => {
-      response = await requests.getCourses({ token: fakeToken });
+      response = await requests.deleteCourse({ token: fakeToken, id: courseToDelete.id });
     });
 
     it('status is OK', () => assert.equal(response.status, 200));
 
-    it('body has the course', () => assert.deepEqual(response.body, expectedCourses));
+    it('get deleted course returns 404', async () => {
+      response = await requests.getCourse({ id: courseToDelete.id, token: fakeToken });
+      assert.deepEqual(response.status, 404);
+    });
   });
 });
