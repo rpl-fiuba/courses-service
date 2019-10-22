@@ -127,6 +127,10 @@ const deleteCourse = async ({ id }) => {
   await trx.commit();
 };
 
+const updateCourse = async ({ id, name, description }) => knex(COURSES_TABLE)
+  .update({ name, description })
+  .where({ id });
+
 module.exports = {
   getCourses,
   addCourse,
@@ -134,4 +138,5 @@ module.exports = {
   getCourse,
   addUserToCourse,
   deleteCourse,
+  updateCourse,
 };

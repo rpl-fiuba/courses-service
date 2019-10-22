@@ -60,10 +60,25 @@ function errorWrapper(funct) {
 }
 
 
+const updateCourse = async ({
+  id,
+  name,
+  description,
+  token,
+}) => doRequest({
+  requestUrl: `${baseUrl}/courses/${id}`,
+  params: {
+    method: 'PUT',
+    body: JSON.stringify({ name, description }),
+  },
+  token
+});
+
 module.exports = {
   status: errorWrapper(status),
   getCourses: errorWrapper(getCourses),
   addCourse: errorWrapper(addCourse),
   getCourse: errorWrapper(getCourse),
   deleteCourse: errorWrapper(deleteCourse),
+  updateCourse: errorWrapper(updateCourse),
 };

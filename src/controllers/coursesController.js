@@ -8,28 +8,19 @@ const coursesService = require('../services/coursesService');
  */
 const getCourses = async (req, res) => {
   let { page, limit } = req.query;
-  const { authorization } = req.headers;
+  const { token } = req.context;
 
   // TODO: default values
   page = !page ? 0 : page;
   limit = !limit ? 10 : limit;
 
-  if (!authorization) {
-    return Promise.reject(createError.Unauthorized());
-  }
-
-  const courses = await coursesService.getCourses({ page, limit, userToken: authorization });
+  const courses = await coursesService.getCourses({ page, limit, userToken: token });
 
   return res.status(200).json(courses);
 };
 
 const getCourse = async (req, res) => {
   const { courseId } = req.params;
-  const { authorization } = req.headers;
-
-  if (!authorization) {
-    return Promise.reject(createError.NotAuthorized());
-  }
 
   const course = await coursesService.getCourse({ id: courseId });
 
@@ -41,19 +32,15 @@ const getCourse = async (req, res) => {
 };
 
 const addCourse = async (req, res) => {
-  const { authorization } = req.headers;
+  const { token } = req.context;
   const { name, description } = req.body;
   // TODO: validar el rol del usuario.
-
-  if (!authorization) {
-    return Promise.reject(createError.Unauthorized());
-  }
 
   if (!name || !description) {
     return Promise.reject(createError.BadRequest('name or description have not been provided'));
   }
 
-  const creatorId = authorization;
+  const creatorId = token;
   await coursesService.addCourse({
     name,
     description,
@@ -69,11 +56,6 @@ const addCourse = async (req, res) => {
 
 const addUserToCourse = async (req, res) => {
   const { courseId, userId } = req.body;
-  const { authorization } = req.headers;
-
-  if (!authorization) {
-    return Promise.reject(createError.Unauthorized());
-  }
 
   if (!courseId || !userId) {
     return Promise.reject(createError.BadRequest('courseId or userId not provided'));
@@ -94,16 +76,24 @@ const addUserToCourse = async (req, res) => {
 
 const deleteCourse = async (req, res) => {
   const { courseId } = req.params;
-  const { authorization } = req.headers;
 
   if (!courseId) {
     return Promise.reject(createError.BadRequest('course id not provided'));
   }
-  if (!authorization) {
-    return Promise.reject(createError.Unauthorized());
+  await coursesService.deleteCourse({ id: courseId });
+
+  return res.status(200).json({});
+};
+
+const updateCourse = async (req, res) => {
+  const { courseId } = req.params;
+  const { name, description } = req.body;
+
+  if (!courseId || !name || !description) {
+    return Promise.reject(createError.BadRequest('course id, name or description not provided'));
   }
 
-  await coursesService.deleteCourse({ id: courseId });
+  await coursesService.updateCourse({ id: courseId, name, description });
 
   return res.status(200).json({});
 };
@@ -113,8 +103,7 @@ module.exports = expressify({
   addCourse,
   getCourse,
   addUserToCourse,
-  // updateCourse,
-  // updateCourseUsers,
-  // getCourseUsers,
+  updateCourse,
+  // addUserToCourse,
   deleteCourse,
 });

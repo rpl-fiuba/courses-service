@@ -7,6 +7,7 @@ const configs = require('../configs');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const initialMiddleware = require('./middlewares/initialMiddleware');
 const requestLoggerMiddleware = require('./middlewares/requestLoggerMiddleware');
+const authMiddleware = require('./middlewares/authMiddleware');
 
 const statusController = require('./controllers/statusController');
 const coursesController = require('./controllers/coursesController');
@@ -22,6 +23,7 @@ app.use(requestLoggerMiddleware);
 router.get('/ping', (req, res) => statusController.ping(req, res));
 
 router.use(initialMiddleware);
+router.use(authMiddleware);
 
 // Courses
 router.get('/courses', coursesController.getCourses);
@@ -29,11 +31,11 @@ router.post('/courses', coursesController.addCourse);
 
 // //TODO
 router.get('/courses/:courseId', coursesController.getCourse);
-// router.patch('/courses/:courseId', coursesController.getCourse);
+router.put('/courses/:courseId', coursesController.updateCourse);
 router.delete('/courses/:courseId', coursesController.deleteCourse);
 
-// router.get('/courses/:courseId/users', coursesController.getCourses);
-// router.post('/courses/:courseId/users', coursesController.getCourses);
+// router.get('/courses/:courseId/users', coursesController.getCourseUsers);
+// router.post('/courses/:courseId/users', coursesController.addUserToCourse);
 
 // router.delete('/courses/:courseId/users/:userId', coursesController.getCourses);
 // router.patch('/courses/:courseId/users/:userId', coursesController.getCourses);

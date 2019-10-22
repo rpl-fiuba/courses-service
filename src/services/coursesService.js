@@ -29,10 +29,17 @@ const addUserToCourse = async ({
 
 const deleteCourse = async ({ id }) => courses.deleteCourse({ id });
 
+const updateCourse = async ({ id, description, name }) => courses.updateCourse({
+  name,
+  description,
+  id,
+});
+
 module.exports = {
   getCourses,
   addCourse,
   getCourse,
   addUserToCourse,
   deleteCourse,
+  updateCourse,
 };
