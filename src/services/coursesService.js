@@ -1,45 +1,70 @@
+const createError = require('http-errors');
 const courses = require('../databases/coursesDb');
+const usersService = require('./usersService');
 
-const getCourse = async ({ id }) => courses.getCourse({ id });
-
-const getCourses = async ({ page, limit, userToken }) => {
-  // TODO: users service integration for the moment we use the token
-  const userId = userToken;
-  const coursesByUser = await courses.getCoursesByUser({ page, limit, userId });
-  const result = coursesByUser.map((c) => getCourse({ id: c.courseId }));
-  return Promise.all(result);
+const getCourse = async ({ courseId, userId }) => {
+  if (await usersService.getUser({ courseId, userId }) === null) {
+    return Promise.reject(createError.Forbidden(
+      `The user with id ${userId} dont belong to the course with id ${courseId}`
+    ));
+  }
+  return courses.getCourse({ courseId });
 };
 
+const courseExists = async ({ courseId }) => courses.getCourse({ courseId })
+  .then(() => true)
+  .catch(() => false);
+
+const getUserCourses = async ({
+  page,
+  limit,
+  userId
+}) => courses.getUserCourses({ page, limit, userId });
+
 const addCourse = async ({ description, name, creatorId }) => {
-  // TODO: hacer esto mejor
-  const id = name.toLowerCase().replace(' ', '');
+  // TODO: refactor and think if every user can create courses
+  const courseId = name.toLowerCase().replace(' ', '');
   await courses.addCourse({
     name,
     description,
     creatorId,
-    courseId: id,
+    courseId,
   });
 };
 
-const addUserToCourse = async ({
-  userId,
-  courseId,
-  role
-}) => courses.addUserToCourse({ userId, courseId, role });
+const deleteCourse = async ({ userId, courseId }) => {
+  if (!await usersService.isAdmin({ userId, courseId })) {
+    return Promise.reject(createError.Forbidden());
+  }
+  return courses.deleteCourse({ courseId });
+};
 
-const deleteCourse = async ({ id }) => courses.deleteCourse({ id });
+const updateCourse = async ({
+  courseId, userId, description, name
+}) => {
+  if (!await courseExists({ courseId })) {
+    return Promise.reject(createError.NotFound(`Course with id ${courseId} not found`));
+  }
 
-const updateCourse = async ({ id, description, name }) => courses.updateCourse({
-  name,
-  description,
-  id,
-});
+  if (!await usersService.isAdmin({ userId, courseId })) {
+    return Promise.reject(createError.Forbidden());
+  }
+  return courses.updateCourse({
+    name,
+    description,
+    courseId,
+  });
+};
+
+const getCourses = async ({ page, limit }) => courses.getCourses({ offset: page * limit, limit });
+
 
 module.exports = {
   getCourses,
+  getUserCourses,
   addCourse,
   getCourse,
-  addUserToCourse,
   deleteCourse,
   updateCourse,
+  courseExists,
 };

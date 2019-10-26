@@ -1,8 +1,6 @@
-const url = require('url');
 const fetch = require('node-fetch');
-const configs = require('../../configs');
-
-const baseUrl = url.format(configs.app);
+const url = require('url');
+const configs = require('../../src/configs')();
 
 const doRequest = async ({ requestUrl, params, token }) => {
   const requestParams = !params ? {} : params;
@@ -12,41 +10,6 @@ const doRequest = async ({ requestUrl, params, token }) => {
   };
   const response = await fetch(requestUrl, requestParams);
   return { status: response.status, body: await response.json() };
-};
-
-const status = () => {
-  const statusUrl = `${baseUrl}/ping`;
-  return fetch(statusUrl);
-};
-
-const getCourses = async ({ token }) => doRequest({
-  requestUrl: `${baseUrl}/courses`,
-  token,
-});
-
-const deleteCourse = async ({ token, id }) => doRequest({
-  requestUrl: `${baseUrl}/courses/${id}`,
-  params: {
-    method: 'DELETE'
-  },
-  token,
-});
-
-const getCourse = async ({ token, id }) => doRequest({
-  requestUrl: `${baseUrl}/courses/${id}`,
-  token,
-});
-
-const addCourse = async ({ token, name, description }) => {
-  const data = { name, description };
-  return doRequest({
-    requestUrl: `${baseUrl}/courses`,
-    params: {
-      method: 'POST',
-      body: JSON.stringify(data),
-    },
-    token,
-  });
 };
 
 function errorWrapper(funct) {
@@ -59,26 +22,10 @@ function errorWrapper(funct) {
   };
 }
 
-
-const updateCourse = async ({
-  id,
-  name,
-  description,
-  token,
-}) => doRequest({
-  requestUrl: `${baseUrl}/courses/${id}`,
-  params: {
-    method: 'PUT',
-    body: JSON.stringify({ name, description }),
-  },
-  token
-});
+const baseUrl = url.format(configs.app);
 
 module.exports = {
-  status: errorWrapper(status),
-  getCourses: errorWrapper(getCourses),
-  addCourse: errorWrapper(addCourse),
-  getCourse: errorWrapper(getCourse),
-  deleteCourse: errorWrapper(deleteCourse),
-  updateCourse: errorWrapper(updateCourse),
+  doRequest,
+  errorWrapper,
+  baseUrl,
 };

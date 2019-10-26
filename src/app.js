@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 
-const configs = require('../configs');
+const configs = require('./configs')();
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const initialMiddleware = require('./middlewares/initialMiddleware');
 const requestLoggerMiddleware = require('./middlewares/requestLoggerMiddleware');
@@ -11,6 +11,8 @@ const authMiddleware = require('./middlewares/authMiddleware');
 
 const statusController = require('./controllers/statusController');
 const coursesController = require('./controllers/coursesController');
+const usersController = require('./controllers/usersController');
+const guidesController = require('./controllers/guidesController');
 
 const app = express();
 const { port } = configs.app;
@@ -27,31 +29,25 @@ router.use(authMiddleware);
 
 // Courses
 router.get('/courses', coursesController.getCourses);
+router.get('/my-courses', coursesController.getUserCourses);
 router.post('/courses', coursesController.addCourse);
-
-// //TODO
 router.get('/courses/:courseId', coursesController.getCourse);
 router.put('/courses/:courseId', coursesController.updateCourse);
 router.delete('/courses/:courseId', coursesController.deleteCourse);
 
-// router.get('/courses/:courseId/users', coursesController.getCourseUsers);
-// router.post('/courses/:courseId/users', coursesController.addUserToCourse);
+// Users
+router.get('/courses/:courseId/users', usersController.getUsers);
+router.get('/courses/:courseId/users/:userId', usersController.getUser);
+router.post('/courses/:courseId/users', usersController.addUser);
+router.delete('/courses/:courseId/users/:userId', usersController.deleteUser);
+router.put('/courses/:courseId/users/:userId', usersController.updateUser);
 
-// router.delete('/courses/:courseId/users/:userId', coursesController.getCourses);
-// router.patch('/courses/:courseId/users/:userId', coursesController.getCourses);
-
-// //Guides
-// router.get('/courses/:courseId/guides', coursesController.getCourses);
-// router.post('/courses/:courseId/guides', coursesController.getCourses);
-// router.get('/courses/:courseId/guides/:guideId', coursesController.getCourses);
-// router.patch('/courses/:courseId/guides/:guideId', coursesController.getCourses);
-// router.delete('/courses/:courseId/guides/:guideId', coursesController.getCourses);
-// router.get('/courses/:courseId/guides/:guideId/exercises', coursesController.getCourses);
-// router.post('/courses/:courseId/guides/:guideId/exercises', coursesController.getCourses);
-
-// // Exercises Service has the rest of the logic
-// router.delete('/courses/:courseId/guides/:guideId/exercises/:exerciseId',
-// coursesController.getCourses);
+// Guides
+router.get('/courses/:courseId/guides', guidesController.getGuides);
+router.post('/courses/:courseId/guides', guidesController.addGuide);
+router.get('/courses/:courseId/guides/:guideId', guidesController.getGuide);
+router.put('/courses/:courseId/guides/:guideId', guidesController.updateGuide);
+router.delete('/courses/:courseId/guides/:guideId', guidesController.deleteGuide);
 
 
 app.use(router);

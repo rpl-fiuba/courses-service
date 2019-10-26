@@ -28,7 +28,7 @@ After start the server you will need postgres and npm.
 
 _Note_: If you already has postgres and psql you can just write `PGPASSWORD=postgres psql -U postgres` to enter in the psql console, then do the step 3.
 
-_Note_: If you want to change the postgres user and/or password, edit the file `./configs.js` with this configuration.
+_Note_: If you want to change the postgres user and/or password, edit the file `./dev.js` with this configuration.
 
 _Note_: For more information about postgres migrations, read http://knexjs.org/#Migrations-CLI
 
@@ -38,7 +38,7 @@ _Note_: For more information about postgres migrations, read http://knexjs.org/#
 
 #### `npm start`
 
-_Note_: Now your server is ready in the port specified in the file `./configs.js`. By default the port `5000` is choosen.
+_Note_: Now your server is ready in the port specified in the file `./dev.js`. By default the port `5000` is choosen.
 
 
 ## Run tests

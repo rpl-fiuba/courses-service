@@ -6,6 +6,18 @@ const mockGoogleAuth = ({ status = 200, response = {} }) => {
     .reply(status, response);
 };
 
+//
+const mockUsersService = () => {
+  nock('http://localhost:7000')
+    .persist()
+    .get('/auth')
+      .reply(function(uri, requestBody) { // eslint-disable-line
+      const [authorization] = this.req.headers.authorization;
+      return { userId: authorization };
+    });
+};
+
 module.exports = {
-  mockGoogleAuth
+  mockGoogleAuth,
+  mockUsersService,
 };

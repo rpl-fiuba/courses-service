@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "NODE_ENV=test eslint src tests db",
     "lint:fix": "NODE_ENV=test eslint --fix src tests db",
-    "test:app": "NODE_ENV=test npm run db:latest && NODE_ENV=test nyc mocha tests",
+    "test:app": "NODE_ENV=test npm run db:latest && NODE_ENV=test nyc --reporter=html --reporter=text mocha tests",
     "test": "npm run lint && npm run test:app",
     "start": "NODE_ENV=development npm run db:latest && npm run db:initial-state && NODE_ENV=development node src/app",
     "start:dynamic": "NODE_ENV=development npm run db:latest && npm run db:initial-state && NODE_ENV=development nodemon src/app",
@@ -18,6 +18,7 @@
   "dependencies": {
     "bluebird": "^3.5.5",
     "body-parser": "~1.17.2",
+    "deep-equal-in-any-order": "^1.0.21",
     "eslint": "^6.3.0",
     "express": "^4.15.5",
     "expressify": "^2.0.0",

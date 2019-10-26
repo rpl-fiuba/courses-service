@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 
-const { processDbResponse } = require('../utils/dbUtils');
-const configs = require('../../configs');
+const { processDbResponse, snakelize, handleConflict } = require('../utils/dbUtils');
+const configs = require('../../src/configs')();
 const knex = require('knex')(configs.db); // eslint-disable-line
 
 
@@ -12,16 +12,17 @@ const COURSE_USERS_TABLE = 'course_users';
  *
  */
 
-const getCoursesByUser = async ({
+const getUserCourses = async ({
   userId,
   page,
   limit
-}) => knex(COURSE_USERS_TABLE)
-  .select()
-  .where({ user_id: userId })
-  .returning('*')
-  .offset(page)
-  .limit(limit)
+}) => knex
+  .select('courses.course_id', 'courses.description', 'courses.name')
+  .from(COURSE_USERS_TABLE)
+  .where(snakelize({ userId }))
+  .leftJoin(COURSES_TABLE, 'courses.course_id', 'course_users.course_id')
+  .offset(page || configs.dbDefault.offset)
+  .limit(limit || configs.dbDefault.limit)
   .then(processDbResponse)
   .then((response) => {
     if (!response) {
@@ -34,43 +35,47 @@ const getCoursesByUser = async ({
   });
 
 const getCourses = async ({
-  page,
+  offset,
   limit
-}) => {
-  const { pageSize } = configs.coursesConfig.pageSize;
-  const offset = limit !== null && limit !== undefined ? limit : pageSize;
-  return knex(COURSES_TABLE)
-    .select()
-    .returning('*')
-    .offset(page)
-    .limit(offset)
-    .then(processDbResponse)
-    .then((response) => {
-      console.log(response);
-      if (!response) {
-        throw new createError.NotFound('Courses not found');
-      }
-      return response;
-    });
-};
-
-const getCourse = async ({ id }) => knex(COURSES_TABLE)
+}) => knex(COURSES_TABLE)
   .select()
-  .where({ id })
   .returning('*')
-  .first();
+  .offset(offset || configs.dbDefault.offset)
+  .limit(limit || configs.dbDefault.limit)
+  .then(processDbResponse)
+  .then((response) => {
+    console.log(response);
+    if (!response) {
+      throw new createError.NotFound('Courses not found');
+    }
+    return response;
+  });
+
+const getCourse = async ({ courseId }) => knex(COURSES_TABLE)
+  .select()
+  .where(snakelize({ courseId }))
+  .returning('*')
+  .first()
+  .then(processDbResponse)
+  .then((response) => {
+    if (!response) {
+      throw new createError.NotFound(`Course with id: ${courseId} not found`);
+    }
+    return response;
+  });
 
 const newCourse = ({
   trx,
   name,
   description,
   courseId,
-}) => trx.insert({
-  id: courseId,
+}) => trx.insert(snakelize({
+  courseId,
   name,
   description,
-})
-  .into('courses');
+}))
+  .into(COURSES_TABLE)
+  .catch((err) => handleConflict({ err, resourceName: `Course with id ${courseId}` }));
 
 
 const createCourseCreator = ({
@@ -78,11 +83,11 @@ const createCourseCreator = ({
   courseId,
   creatorId,
 }) => trx
-  .insert({
-    user_id: creatorId,
-    course_id: courseId,
+  .insert(snakelize({
+    userId: creatorId,
+    courseId,
     role: 'admin'
-  }).into('course_users');
+  })).into('course_users');
 
 
 const addCourse = async ({
@@ -106,37 +111,29 @@ const addCourse = async ({
   await trx.commit();
 };
 
-const addUserToCourse = async ({ userId, courseId, role }) => knex(COURSE_USERS_TABLE)
-  .insert({
-    user_id: userId,
-    course_id: courseId,
-    role,
-  });
-
-const deleteCourse = async ({ id }) => {
+const deleteCourse = async ({ courseId }) => {
   const trx = await knex.transaction();
   // TODO: delete on cascade?
   await trx.delete()
     .from(COURSES_TABLE)
-    .where({ id });
+    .where(snakelize({ courseId }));
 
   await trx.delete()
     .from(COURSE_USERS_TABLE)
-    .where({ course_id: id });
+    .where(snakelize({ courseId }));
 
   await trx.commit();
 };
 
-const updateCourse = async ({ id, name, description }) => knex(COURSES_TABLE)
+const updateCourse = async ({ courseId, name, description }) => knex(COURSES_TABLE)
   .update({ name, description })
-  .where({ id });
+  .where(snakelize({ courseId }));
 
 module.exports = {
   getCourses,
   addCourse,
-  getCoursesByUser,
+  getUserCourses,
   getCourse,
-  addUserToCourse,
   deleteCourse,
   updateCourse,
 };

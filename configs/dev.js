@@ -16,10 +16,23 @@ module.exports = {
       host: resolveDbHost(),
       user: 'postgres',
       password: 'postgres',
-      database: 'courses'
+      database: 'courses_service'
     }
   },
-  coursesConfig: {
-    pageSize: 40
+  dbDefault: {
+    limit: 40,
+    offset: 0,
+  },
+  services: {
+    usersService: {
+      url: {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '7000'
+      },
+      paths: {
+        auth: 'auth'
+      }
+    },
   }
 };
