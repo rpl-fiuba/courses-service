@@ -1,11 +1,13 @@
 exports.up = (knex) => {
   const query = `
     create type user_role as enum('student', 'professor', 'admin');
+    create type status as enum('draft', 'published');
 
     CREATE TABLE IF NOT EXISTS courses(
-      course_id     CHARACTER VARYING(256) NOT NULL PRIMARY KEY,
-      name          CHARACTER VARYING(128) NOT NULL,
-      description   CHARACTER VARYING(256) NOT NULL
+      course_id       CHARACTER VARYING(256) NOT NULL PRIMARY KEY,
+      name            CHARACTER VARYING(128) NOT NULL,
+      course_status   status NOT NULL,
+      description     CHARACTER VARYING(256) NOT NULL
     );
     
     CREATE TABLE IF NOT EXISTS course_users(
@@ -20,6 +22,7 @@ exports.up = (knex) => {
       course_id     CHARACTER VARYING(256) NOT NULL,
       name          CHARACTER VARYING(256) NOT NULL,
       description   CHARACTER VARYING(256) NOT NULL,
+      guide_status  status NOT NULL,
       PRIMARY KEY (guide_id, course_id)
     );
     `;
