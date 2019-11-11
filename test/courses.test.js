@@ -14,8 +14,8 @@ describe('Course Tests', () => {
   let course;
   let courses;
 
+  before(cleanDb);
   beforeEach(() => {
-    cleanDb();
     mocks.mockUsersService({});
     course = { name: 'curso', description: 'description', courseId: 'curso' };
     courses = [];
@@ -90,7 +90,10 @@ describe('Course Tests', () => {
 
       beforeEach(async () => {
         const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: token });
-        expectedCourse = coursesAndCreators.courses[0]; // eslint-disable-line
+        expectedCourse = {
+          ...coursesAndCreators.courses[0],
+          courseStatus: 'draft'
+        };
         response = await requests.getCourse({ token, course: expectedCourse });
       });
 
@@ -113,7 +116,10 @@ describe('Course Tests', () => {
       let expectedCourses;
       beforeEach(async () => {
         const coursesAndCreators = await addCourseMocks({ coursesNumber: 3, creatorId: token });
-        expectedCourses = coursesAndCreators.courses;
+        expectedCourses = coursesAndCreators.courses.map(($course) => ({
+          ...$course,
+          courseStatus: 'draft'
+        }));
         response = await requests.getCourses({ token });
       });
 
@@ -140,7 +146,12 @@ describe('Course Tests', () => {
 
         const name = 'curso';
         const description = 'un curso mas';
-        finalCourse = { courseId: firstCourse.courseId, name, description };
+        finalCourse = {
+          courseId: firstCourse.courseId,
+          name,
+          description,
+          courseStatus: 'draft'
+        };
 
         response = await requests.updateCourse({ course: finalCourse, token });
       });

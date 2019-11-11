@@ -6,7 +6,7 @@ exports.up = (knex) => {
     CREATE TABLE IF NOT EXISTS courses(
       course_id       CHARACTER VARYING(256) NOT NULL PRIMARY KEY,
       name            CHARACTER VARYING(128) NOT NULL,
-      course_status   status NOT NULL,
+      course_status   status NOT NULL DEFAULT 'draft',
       description     CHARACTER VARYING(256) NOT NULL
     );
     
@@ -22,7 +22,7 @@ exports.up = (knex) => {
       course_id     CHARACTER VARYING(256) NOT NULL,
       name          CHARACTER VARYING(256) NOT NULL,
       description   CHARACTER VARYING(256) NOT NULL,
-      guide_status  status NOT NULL,
+      guide_status  status NOT NULL DEFAULT 'draft',
       PRIMARY KEY (guide_id, course_id)
     );
     `;
@@ -36,6 +36,7 @@ exports.down = (knex) => {
     DROP TABLE guides;
     DROP TABLE course_users;
     DROP TYPE user_role;
+    DROP TYPE status;
   `;
   return knex.raw(query);
 };

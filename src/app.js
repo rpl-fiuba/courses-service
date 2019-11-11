@@ -60,6 +60,10 @@ app.get('*', (req, res) => {
 });
 
 //  Start server on port
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server started at port ${port}`);
 });
+
+module.exports = {
+  server
+};

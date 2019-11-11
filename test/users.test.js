@@ -17,8 +17,8 @@ describe('Users Tests', () => {
   const token = 'fakeToken';
   let user;
 
+  before(cleanDb);
   beforeEach(() => {
-    cleanDb();
     mocks.mockUsersService({ response: { userId: token } });
     user = {};
   });
@@ -138,5 +138,4 @@ describe('Users Tests', () => {
       it('body has the course', () => expect(response.body).to.deep.equalInAnyOrder(expectedUsers));
     });
   });
-
 });
