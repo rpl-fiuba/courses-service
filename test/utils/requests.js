@@ -9,7 +9,11 @@ const doRequest = async ({ requestUrl, params, token }) => {
     'Content-Type': 'application/json',
   };
   const response = await fetch(requestUrl, requestParams);
-  return { status: response.status, body: await response.json() };
+
+  if (response.status !== 204) {
+    return { status: response.status, body: await response.json() };
+  }
+  return { status: response.status };
 };
 
 function errorWrapper(funct) {

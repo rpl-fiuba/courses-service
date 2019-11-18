@@ -1,94 +1,89 @@
+const _ = require('lodash');
 const createError = require('http-errors');
 
 const { processDbResponse, snakelize, handleConflict } = require('../utils/dbUtils');
 const configs = require('../../src/configs')();
 const knex = require('knex')(configs.db); // eslint-disable-line
 
-
 const COURSES_TABLE = 'courses';
 const COURSE_USERS_TABLE = 'course_users';
+
 /**
- * Get courses.
+ * Get courses by user
  *
  */
-
 const getUserCourses = async ({
   userId,
   page,
   limit
 }) => knex
-  .select('courses.course_id', 'courses.description', 'courses.name')
+  .select()
   .from(COURSE_USERS_TABLE)
   .where(snakelize({ userId }))
   .leftJoin(COURSES_TABLE, 'courses.course_id', 'course_users.course_id')
   .offset(page || configs.dbDefault.offset)
   .limit(limit || configs.dbDefault.limit)
+  .orderBy('created_at')
   .then(processDbResponse)
   .then((response) => {
     if (!response) {
-      throw new createError.NotFound('Courses not found');
-    }
-    if (!response.length) {
-      return [response];
+      return [];
     }
     return response;
   });
 
-const getCourses = async ({
+/**
+ * Search published courses.
+ *  - If the userId is present, then the users courses will be excluded
+ *
+ */
+const searchCourses = async ({
   offset,
-  limit
+  limit,
+  userId
 }) => knex(COURSES_TABLE)
   .select()
-  .returning('*')
+  .where('course_status', 'published')
+  .modify((queryBuilder) => {
+    if (userId) {
+      queryBuilder.whereNotExists(function filter() {
+        this.select()
+          .from(COURSE_USERS_TABLE)
+          .where('user_id', userId)
+          .whereRaw('course_users.course_id = courses.course_id');
+      });
+    }
+  })
   .offset(offset || configs.dbDefault.offset)
   .limit(limit || configs.dbDefault.limit)
+  .orderBy('created_at')
   .then(processDbResponse)
   .then((response) => {
     if (!response) {
-      throw new createError.NotFound('Courses not found');
+      return [];
     }
     return response;
   });
 
+/**
+ * Get an specific course
+ *
+ */
 const getCourse = async ({ courseId }) => knex(COURSES_TABLE)
   .select()
   .where(snakelize({ courseId }))
-  .returning('*')
-  .first()
   .then(processDbResponse)
   .then((response) => {
-    if (!response) {
+    if (!response.length) {
       throw new createError.NotFound(`Course with id: ${courseId} not found`);
     }
-    return response;
+    return response[0];
   });
 
-const newCourse = ({
-  trx,
-  name,
-  description,
-  courseId,
-}) => trx.insert(snakelize({
-  courseId,
-  name,
-  description,
-}))
-  .into(COURSES_TABLE)
-  .catch((err) => handleConflict({ err, resourceName: `Course with id ${courseId}` }));
-
-
-const createCourseCreator = ({
-  trx,
-  courseId,
-  creatorId,
-}) => trx
-  .insert(snakelize({
-    userId: creatorId,
-    courseId,
-    role: 'admin'
-  })).into('course_users');
-
-
+/**
+ * Add new course
+ *
+ */
 const addCourse = async ({
   courseId,
   name,
@@ -96,7 +91,7 @@ const addCourse = async ({
   creatorId,
 }) => {
   const trx = await knex.transaction();
-  await newCourse({
+  await insertNewCourse({
     trx,
     name,
     description,
@@ -110,6 +105,10 @@ const addCourse = async ({
   await trx.commit();
 };
 
+/**
+ * Delete an specific course
+ *
+ */
 const deleteCourse = async ({ courseId }) => {
   const trx = await knex.transaction();
   // TODO: delete on cascade?
@@ -124,15 +123,62 @@ const deleteCourse = async ({ courseId }) => {
   await trx.commit();
 };
 
+/**
+ * Update an specific course
+ *
+ */
 const updateCourse = async ({ courseId, name, description }) => knex(COURSES_TABLE)
   .update({ name, description })
-  .where(snakelize({ courseId }));
+  .where(snakelize({ courseId }))
+  .returning('*')
+  .then(processDbResponse);
+
+/**
+ * Given some courses, the professors are added to them
+ *
+ */
+const includeProfessorsToCourses = async ({ courses }) => {
+  const courseIds = courses.map((course) => course.courseId);
+
+  const allProfessors = await knex(COURSE_USERS_TABLE)
+    .select()
+    .whereIn('role', ['professor', 'creator'])
+    .whereIn('course_id', courseIds)
+    .then(processDbResponse);
+
+  const professorsByCourse = _.groupBy(allProfessors, 'courseId');
+
+  return courses.map((course) => ({
+    ...course,
+    professors: professorsByCourse[course.courseId]
+  }));
+};
+
+const insertNewCourse = ({
+  trx,
+  name,
+  description,
+  courseId,
+}) => trx
+  .insert(snakelize({ courseId, name, description }))
+  .into(COURSES_TABLE)
+  .catch((err) => handleConflict({ err, resourceName: `Course with id ${courseId}` }));
+
+const createCourseCreator = ({
+  trx,
+  courseId,
+  creatorId,
+}) => trx
+  .insert(snakelize({ userId: creatorId, courseId, role: 'creator' }))
+  .into('course_users');
+
 
 module.exports = {
-  getCourses,
   addCourse,
   getUserCourses,
   getCourse,
   deleteCourse,
+  includeProfessorsToCourses,
+  searchCourses,
   updateCourse,
 };

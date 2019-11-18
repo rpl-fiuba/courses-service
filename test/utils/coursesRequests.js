@@ -6,7 +6,12 @@ const status = () => {
   return fetch(statusUrl);
 };
 
-const getCourses = async ({ token }) => doRequest({
+const searchCourses = async ({ token }) => doRequest({
+  requestUrl: `${baseUrl}/courses/search`,
+  token,
+});
+
+const getUserCourses = async ({ token }) => doRequest({
   requestUrl: `${baseUrl}/courses`,
   token,
 });
@@ -52,10 +57,11 @@ const getCourseUsers = async ({ courseId, token }) => doRequest({
 
 module.exports = {
   status: errorWrapper(status),
-  getCourses: errorWrapper(getCourses),
   addCourse: errorWrapper(addCourse),
   getCourse: errorWrapper(getCourse),
   deleteCourse: errorWrapper(deleteCourse),
   updateCourse: errorWrapper(updateCourse),
+  searchCourses: errorWrapper(searchCourses),
+  getUserCourses: errorWrapper(getUserCourses),
   getCourseUsers: errorWrapper(getCourseUsers),
 };

@@ -31,7 +31,7 @@ module.exports = {
         port: '7000'
       },
       paths: {
-        auth: 'auth'
+        auth: 'login'
       }
     },
   }

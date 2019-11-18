@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -17,6 +18,8 @@ const guidesController = require('./controllers/guidesController');
 const app = express();
 const { port } = configs.app;
 
+app.use(cors());
+
 //  Body parser middleware
 app.use(bodyParser.json());
 app.use(requestLoggerMiddleware);
@@ -28,8 +31,8 @@ router.use(initialMiddleware);
 router.use(authMiddleware);
 
 // Courses
-router.get('/courses', coursesController.getCourses);
-router.get('/my-courses', coursesController.getUserCourses);
+router.get('/courses/search', coursesController.searchCourses);
+router.get('/courses', coursesController.getUserCourses);
 router.post('/courses', coursesController.addCourse);
 router.get('/courses/:courseId', coursesController.getCourse);
 router.put('/courses/:courseId', coursesController.updateCourse);

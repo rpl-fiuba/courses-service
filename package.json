@@ -11,7 +11,7 @@
     "test:watch": "npm run test:app -- --watch",
     "test": "npm run lint && nyc --reporter=html --reporter=text npm run test:app",
     "start": "export NODE_ENV=dev && npm run db:latest && npm run db:initial-state && node src/app",
-    "start:watch": "export NODE_ENV=dev && npm run db:latest && npm run db:initial-state && nodemon src/app",
+    "start:watch": "export NODE_ENV=dev && npm run db:rollback-all && npm run db:latest && npm run db:initial-state && nodemon src/app",
     "db:latest": "knex migrate:latest",
     "db:rollback": "knex migrate:rollback",
     "db:rollback-all": "knex migrate:rollback --all",
@@ -20,6 +20,7 @@
   "dependencies": {
     "bluebird": "^3.5.5",
     "body-parser": "~1.17.2",
+    "cors": "^2.8.5",
     "deep-equal-in-any-order": "^1.0.21",
     "eslint": "^6.3.0",
     "express": "^4.15.5",

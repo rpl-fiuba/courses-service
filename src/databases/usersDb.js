@@ -6,35 +6,45 @@ const knex = require('knex')(configs.db); // eslint-disable-line
 
 const COURSE_USERS_TABLE = 'course_users';
 
-const getUsers = async ({ courseId, limit, offset }) => knex
+/**
+ * Get users of the course
+ *
+ */
+const getUsers = async ({ courseId, limit, offset }) => knex(COURSE_USERS_TABLE)
   .select()
-  .from(COURSE_USERS_TABLE)
   .where(snakelize({ courseId }))
   .limit(limit || configs.dbDefault.limit)
   .offset(offset || configs.dbDefault.offset)
   .then(processDbResponse)
   .then((response) => {
-    if (!response) {
+    if (!response.length) {
       throw new createError.NotFound(`Users not found for course ${courseId}`);
     }
     return response;
   });
 
+/**
+ * Get an specific user
+ *
+ */
 const getUser = async ({
   courseId,
   userId
-}) => knex.select()
-  .from(COURSE_USERS_TABLE)
+}) => knex(COURSE_USERS_TABLE)
+  .select()
   .where(snakelize({ courseId, userId }))
   .then(processDbResponse)
   .then((response) => {
-    if (!response) {
+    if (!response.length) {
       throw new createError.NotFound(`User with id ${userId} not found for course ${courseId}`);
     }
-    return response;
+    return response[0];
   });
 
-
+/**
+ * Add user to a course
+ *
+ */
 const addUser = async ({ userId, courseId, role }) => knex(COURSE_USERS_TABLE)
   .insert(snakelize({
     userId,
@@ -43,13 +53,20 @@ const addUser = async ({ userId, courseId, role }) => knex(COURSE_USERS_TABLE)
   }))
   .catch((err) => handleConflict({ err, resourceName: `User with id ${userId}` }));
 
-const deleteUser = async ({ courseId, userId }) => knex.delete()
-  .from(COURSE_USERS_TABLE)
+/**
+ * Delete user from course
+ *
+ */
+const deleteUser = async ({ courseId, userId }) => knex(COURSE_USERS_TABLE)
+  .delete()
   .where(snakelize({ courseId, userId }));
 
-const updateUser = async ({ courseId, userId, role }) => knex
+/**
+ * Update an specific user
+ *
+ */
+const updateUser = async ({ courseId, userId, role }) => knex(COURSE_USERS_TABLE)
   .update({ role })
-  .from(COURSE_USERS_TABLE)
   .where(snakelize({ courseId, userId }));
 
 module.exports = {

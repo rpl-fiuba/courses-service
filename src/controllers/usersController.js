@@ -38,7 +38,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   const { courseId, userId } = req.params;
   await usersService.deleteUser({ courseId, userId });
-  return res.status(200).json({});
+  return res.status(204).json({});
 };
 
 module.exports = expressify({

@@ -1,26 +1,35 @@
 const createError = require('http-errors');
-const guides = require('../databases/guidesDb');
+const guidesDb = require('../databases/guidesDb');
 const coursesService = require('./coursesService');
 const usersService = require('./usersService');
 
+/**
+ * Get guides from course
+ *
+ */
 const getGuides = async ({
   courseId,
   limit,
   offset,
-}) => guides.getGuides({ courseId, limit, offset });
+}) => guidesDb.getGuides({ courseId, limit, offset });
 
+/**
+ * Add a guide to the course
+ *
+ */
 const addGuide = async ({
   courseId,
   name,
   description,
   userId,
 }) => {
-  if (!await coursesService.courseExists({ courseId })) {
+  const doesCourseExist = await coursesService.doesCourseExists({ courseId });
+  if (!doesCourseExist) {
     return Promise.reject(createError.BadRequest(`course with id: ${courseId} does not exist`));
   }
 
-  if (!await usersService.isAdmin({ courseId, userId })
-    && !await usersService.isProfessor({ courseId, userId })) {
+  const hasEditPermission = await usersService.hasEditPermission({ courseId, userId });
+  if (!hasEditPermission) {
     return Promise.reject(createError.Forbidden(
       `User with id: ${userId} do not have permission `
       + `to create guides for the course with id ${courseId}`
@@ -35,19 +44,23 @@ const addGuide = async ({
     description,
   };
 
-  await guides.addGuide({ guide });
+  await guidesDb.addGuide({ guide });
   return guide;
 };
 
+/**
+ * Delete an specific guide
+ *
+ */
 const deleteGuide = async ({
   courseId,
   guideId,
-}) => guides.deleteGuide({ courseId, guideId });
+}) => guidesDb.deleteGuide({ courseId, guideId });
 
-const guideExists = async ({ courseId, guideId }) => guides.getGuide({ courseId, guideId })
-  .then(() => true)
-  .catch(() => false);
-
+/**
+ * Update an specific guide
+ *
+ */
 const updateGuide = async ({
   courseId,
   guideId,
@@ -55,17 +68,18 @@ const updateGuide = async ({
   description,
   userId,
 }) => {
-  if (!await coursesService.courseExists({ courseId })) {
+  const doesCourseExist = await coursesService.doesCourseExists({ courseId });
+  if (!doesCourseExist) {
     return Promise.reject(createError.NotFound(`Course with id: ${courseId} not found`));
   }
-  if (!await guideExists({ courseId, guideId })) {
+  if (!await doesGuideExists({ courseId, guideId })) {
     return Promise.reject(createError.NotFound(
       `Guide with id ${guideId} not found for course with id ${courseId}`
     ));
   }
 
-  if (!await usersService.isAdmin({ courseId, userId })
-    && !await usersService.isProfessor({ courseId, userId })) {
+  const hasEditPermission = await usersService.hasEditPermission({ courseId, userId });
+  if (!hasEditPermission) {
     return Promise.reject(createError.Forbidden(
       `User with id: ${userId} do not have permission `
       + `to create guides for the course with id ${courseId}`
@@ -79,12 +93,19 @@ const updateGuide = async ({
     description,
   };
 
-  await guides.updateGuide(guide);
+  await guidesDb.updateGuide(guide);
   return guide;
 };
 
+/**
+ * Get an specific guide
+ *
+ */
+const getGuide = async ({ courseId, guideId }) => guidesDb.getGuide({ courseId, guideId });
 
-const getGuide = async ({ courseId, guideId }) => guides.getGuide({ courseId, guideId });
+const doesGuideExists = async ({ courseId, guideId }) => guidesDb.getGuide({ courseId, guideId })
+  .then(() => true)
+  .catch(() => false);
 
 module.exports = {
   getGuides,

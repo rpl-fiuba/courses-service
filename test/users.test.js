@@ -13,21 +13,32 @@ process.env.NODE_ENV = 'test';
 require('../src/app.js');
 
 describe('Users Tests', () => {
-  let response;
   const token = 'fakeToken';
+  let response;
   let user;
+  let professorProfile;
 
   before(cleanDb);
   beforeEach(() => {
-    mocks.mockUsersService({ response: { userId: token } });
     user = {};
+    professorProfile = {
+      userId: 'professor-id',
+      name: 'Licha',
+      email: 'licha@gmail',
+      role: 'professor'
+    };
   });
   afterEach(cleanDb);
 
   describe('Add User', () => {
     describe('When the user is correct and doesnt exist', () => {
       beforeEach(async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: 'creator' });
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         const { courseId } = coursesAndCreators.courses[0];
         user = { role: 'student', courseId, userId: token, };
         response = await requests.addUser({ user, token });
@@ -35,6 +46,8 @@ describe('Users Tests', () => {
 
       it('should return status CREATED', () => assert.equal(response.status, 201));
       it('the user should exist in the db after adding it', async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+
         response = await requests.getUser({ user, token });
         assert.deepEqual(response.body, user);
       });
@@ -42,7 +55,12 @@ describe('Users Tests', () => {
 
     describe('When the user already exists', () => {
       beforeEach(async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: 'creator' });
+        mocks.mockUsersService({ profile: professorProfile, times: 2 });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         const { courseId } = coursesAndCreators.courses[0];
         user = { role: 'student', courseId, userId: token, };
         response = await requests.addUser({ user, token });
@@ -53,11 +71,19 @@ describe('Users Tests', () => {
     });
 
     describe('When there are missing fields', () => {
-      it('should return BAD REQUEST', async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: 'creator' });
+      beforeEach(async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         const { courseId } = coursesAndCreators.courses[0];
         const userWithoutRole = { courseId, userId: token, };
         response = await requests.addUser({ user: userWithoutRole, token });
+      });
+
+      it('should return BAD REQUEST', async () => {
         assert.equal(response.status, 400);
       });
     });
@@ -68,14 +94,21 @@ describe('Users Tests', () => {
   describe('Delete User', () => {
     describe('When the user exists', () => {
       beforeEach(async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: token });
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         const { courseId } = coursesAndCreators.courses[0];
         [user] = coursesAndCreators.creators.filter((c) => c.courseId === courseId);
         response = await requests.deleteUser({ user, token });
       });
 
-      it('should return status 200', () => assert.equal(response.status, 200));
+      it('should return status 200', () => assert.equal(response.status, 204));
       it('get user should return 404 after deleting the user', async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+
         response = await requests.getUser({ user, token });
         assert.equal(response.status, 404);
       });
@@ -85,7 +118,12 @@ describe('Users Tests', () => {
   describe('Get User', () => {
     describe('When the user exists', () => {
       beforeEach(async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: token });
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         const { courseId } = coursesAndCreators.courses[0];
         [user] = coursesAndCreators.creators.filter((c) => c.courseId === courseId);
         response = await requests.getUser({ user, token });
@@ -100,7 +138,12 @@ describe('Users Tests', () => {
   describe('Update User', () => {
     describe('When the user exists', () => {
       beforeEach(async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: token });
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         const { courseId } = coursesAndCreators.courses[0];
         [user] = coursesAndCreators.creators.filter((c) => c.courseId === courseId);
         user.role = 'professor';
@@ -109,6 +152,8 @@ describe('Users Tests', () => {
 
       it('should return status 200', () => assert.equal(response.status, 200));
       it('get user should return the updated user', async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+
         response = await requests.getUser({ user, token });
         assert.deepEqual(response.body, user);
       });
@@ -124,7 +169,12 @@ describe('Users Tests', () => {
 
       // Set up database
       beforeEach(async () => {
-        const coursesAndCreators = await addCourseMocks({ coursesNumber: 1, creatorId: token });
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
         courseId = coursesAndCreators.courses[0].courseId;
         const creator = coursesAndCreators.creators.filter((c) => c.courseId === courseId)[0];
         const mockUsers = await addCourseUserMocks({ courseId, usersAmount: 3, role: 'student' });

@@ -1,9 +1,10 @@
 const createError = require('http-errors');
 const users = require('../databases/usersDb');
 
-const ADMIN_ROLE = 'admin';
+const ADMIN_ROLE = 'creator';
 const STUDENT_ROLE = 'student';
 const PROFESSOR_ROLE = 'professor';
+const ROLES_WITH_EDIT_PERMISSIONS = [ADMIN_ROLE, PROFESSOR_ROLE];
 const validRoles = [ADMIN_ROLE, STUDENT_ROLE, PROFESSOR_ROLE];
 
 const getUsers = async ({
@@ -59,7 +60,7 @@ const deleteUser = async ({
   courseId
 });
 
-const isAdmin = async ({
+const isCreator = async ({
   userId, courseId
 }) => getUser({
   userId,
@@ -68,13 +69,13 @@ const isAdmin = async ({
   .then((user) => user.role === ADMIN_ROLE)
   .catch(() => false);
 
-const isProfessor = async ({
+const hasEditPermission = async ({
   userId,
   courseId
 }) => getUser({
   userId,
   courseId,
-}).then((user) => user.role === PROFESSOR_ROLE)
+}).then((user) => ROLES_WITH_EDIT_PERMISSIONS.includes(user.role))
   .catch(() => false);
 
 
@@ -84,6 +85,6 @@ module.exports = {
   addUser,
   updateUser,
   deleteUser,
-  isAdmin,
-  isProfessor,
+  isCreator,
+  hasEditPermission
 };
