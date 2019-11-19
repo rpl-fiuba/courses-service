@@ -34,20 +34,21 @@ const getCourse = async (req, res) => {
  */
 const addCourse = async (req, res) => {
   const { userId } = req.context.user;
-  const { name, description } = req.body;
+  const { name, description, password } = req.body;
 
   if (!name || !description) {
     return Promise.reject(createError.BadRequest('name or description have not been provided'));
   }
 
   const creatorId = userId;
-  await coursesService.addCourse({
+  const createdCourse = await coursesService.addCourse({
     name,
+    password,
     description,
     creatorId,
   });
 
-  return res.status(201).json({});
+  return res.status(201).json(createdCourse);
 };
 
 /**

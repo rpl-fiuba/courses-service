@@ -8,6 +8,7 @@ exports.up = (knex) => {
       name            CHARACTER VARYING(128) NOT NULL,
       course_status   status NOT NULL DEFAULT 'draft',
       description     CHARACTER VARYING(256),
+      password        CHARACTER VARYING(64),
       created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     

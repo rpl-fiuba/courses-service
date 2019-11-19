@@ -30,7 +30,11 @@ const getCourse = async ({ token, course }) => doRequest({
 });
 
 const addCourse = async ({ token, course }) => {
-  const data = { name: course.name, description: course.description };
+  const data = {
+    name: course.name,
+    password: course.password,
+    description: course.description
+  };
   return doRequest({
     requestUrl: `${baseUrl}/courses`,
     params: {

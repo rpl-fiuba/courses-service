@@ -48,6 +48,7 @@ describe('Course Tests', () => {
         courseWithProfessors = {
           ...course,
           userId: professorProfile.userId,
+          password: 'secret',
           courseStatus: 'draft',
           role: 'creator',
           professors: [{
@@ -56,10 +57,14 @@ describe('Course Tests', () => {
             userId: professorProfile.userId
           }]
         };
-        response = await requests.addCourse({ token, course });
+        response = await requests.addCourse({ token, course: { ...course, password: 'secret' } });
       });
 
       it('status is OK', () => assert.equal(response.status, 201));
+
+      it('body has the created course is OK', () => {
+        expect(sanitizeResponse(response.body)).to.deep.equal(courseWithProfessors);
+      });
 
       it('get course should return the course added', async () => {
         mocks.mockUsersService({ profile: professorProfile });
@@ -154,6 +159,7 @@ describe('Course Tests', () => {
         expectedCourse = {
           ...coursesAndCreators.courses[0],
           courseStatus: 'draft',
+          password: null,
           professors: [{
             courseId: coursesAndCreators.courses[0].courseId,
             role: 'creator',
@@ -192,6 +198,7 @@ describe('Course Tests', () => {
           });
           expectedCourses = coursesAndCreators.courses.map(($course) => ({
             ...$course,
+            password: null,
             courseStatus: 'draft',
             userId: professorProfile.userId,
             role: 'creator',
@@ -360,6 +367,7 @@ describe('Course Tests', () => {
           courseId: firstCourse.courseId,
           name,
           description,
+          password: null,
           courseStatus: 'draft',
           professors: [{
             courseId: firstCourse.courseId,

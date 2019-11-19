@@ -42,15 +42,24 @@ const getUserCourses = async ({
  * Add course
  *
  */
-const addCourse = async ({ description, name, creatorId }) => {
+const addCourse = async ({
+  description, name, password, creatorId
+}) => {
   const courseId = name.toLowerCase().replace(' ', '-');
 
-  return coursesDb.addCourse({
+  const createdCourse = await coursesDb.addCourse({
     name,
+    password,
     description,
     creatorId,
     courseId,
   });
+
+  const coursesWithProfessors = await coursesDb.includeProfessorsToCourses({
+    courses: [createdCourse]
+  });
+
+  return coursesWithProfessors[0];
 };
 
 /**

@@ -7,6 +7,13 @@ const knex = require('knex')(configs.db); // eslint-disable-line
 
 const COURSES_TABLE = 'courses';
 const COURSE_USERS_TABLE = 'course_users';
+const VISIBLE_FIELDS_TO_RETURN = [
+  'course_id',
+  'name',
+  'course_status',
+  'description',
+  'created_at'
+];
 
 /**
  * Get courses by user
@@ -23,7 +30,7 @@ const getUserCourses = async ({
   .leftJoin(COURSES_TABLE, 'courses.course_id', 'course_users.course_id')
   .offset(page || configs.dbDefault.offset)
   .limit(limit || configs.dbDefault.limit)
-  .orderBy('created_at')
+  .orderBy('created_at', 'desc')
   .then(processDbResponse)
   .then((response) => {
     if (!response) {
@@ -42,7 +49,7 @@ const searchCourses = async ({
   limit,
   userId
 }) => knex(COURSES_TABLE)
-  .select()
+  .select(VISIBLE_FIELDS_TO_RETURN)
   .where('course_status', 'published')
   .modify((queryBuilder) => {
     if (userId) {
@@ -56,7 +63,7 @@ const searchCourses = async ({
   })
   .offset(offset || configs.dbDefault.offset)
   .limit(limit || configs.dbDefault.limit)
-  .orderBy('created_at')
+  .orderBy('created_at', 'desc')
   .then(processDbResponse)
   .then((response) => {
     if (!response) {
@@ -87,13 +94,15 @@ const getCourse = async ({ courseId }) => knex(COURSES_TABLE)
 const addCourse = async ({
   courseId,
   name,
+  password,
   description,
   creatorId,
 }) => {
   const trx = await knex.transaction();
-  await insertNewCourse({
+  const createdCourse = await insertNewCourse({
     trx,
     name,
+    password,
     description,
     courseId,
   });
@@ -103,6 +112,12 @@ const addCourse = async ({
     creatorId,
   });
   await trx.commit();
+
+  return {
+    ...createdCourse[0],
+    role: 'creator',
+    userId: creatorId
+  };
 };
 
 /**
@@ -157,11 +172,16 @@ const includeProfessorsToCourses = async ({ courses }) => {
 const insertNewCourse = ({
   trx,
   name,
+  password,
   description,
   courseId,
 }) => trx
-  .insert(snakelize({ courseId, name, description }))
+  .insert(snakelize({
+    courseId, name, description, password
+  }))
   .into(COURSES_TABLE)
+  .returning('*')
+  .then(processDbResponse)
   .catch((err) => handleConflict({ err, resourceName: `Course with id ${courseId}` }));
 
 const createCourseCreator = ({
