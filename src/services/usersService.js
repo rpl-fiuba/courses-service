@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const users = require('../databases/usersDb');
+const coursesDb = require('../databases/coursesDb');
 
 const ADMIN_ROLE = 'creator';
 const STUDENT_ROLE = 'student';
@@ -7,7 +8,7 @@ const PROFESSOR_ROLE = 'professor';
 const ROLES_WITH_EDIT_PERMISSIONS = [ADMIN_ROLE, PROFESSOR_ROLE];
 const validRoles = [ADMIN_ROLE, STUDENT_ROLE, PROFESSOR_ROLE];
 
-const getUsers = async ({
+const getUsersFromCourse = async ({
   courseId,
   limit,
   offset
@@ -25,16 +26,26 @@ const getUser = async ({
   courseId
 });
 
-const addUser = async ({
+const addUserToCourse = async ({
   courseId,
   userId,
-  role
+  role,
+  password
 }) => {
   if (!validRoles.includes(role)) {
     return Promise.reject(
       createError.BadRequest(`Invalid role: ${role}. Valid roles: ${validRoles}`)
     );
   }
+
+  const course = await coursesDb.getCourse({ courseId });
+
+  if (course.password && course.password !== password) {
+    return Promise.reject(
+      createError.Conflict('The password is invalid')
+    );
+  }
+
   return users.addUser({
     courseId,
     userId,
@@ -52,7 +63,7 @@ const updateUser = async ({
   role
 });
 
-const deleteUser = async ({
+const deleteUserFromCourse = async ({
   courseId,
   userId
 }) => users.deleteUser({
@@ -80,11 +91,11 @@ const hasEditPermission = async ({
 
 
 module.exports = {
-  getUsers,
+  getUsersFromCourse,
+  addUserToCourse,
+  deleteUserFromCourse,
   getUser,
-  addUser,
   updateUser,
-  deleteUser,
   isCreator,
   hasEditPermission
 };

@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { assert, expect } = require('chai');
 const requests = require('./utils/coursesRequests');
 const { cleanDb, sanitizeResponse } = require('./utils/db');
@@ -289,7 +290,7 @@ describe('Course Tests', () => {
             creator: professorProfile
           });
           expectedCourses = coursesAndCreators.courses.map(($course) => ({
-            ...$course,
+            ..._.omit($course, ['password']),
             courseStatus: 'published',
             professors: [{
               courseId: $course.courseId,

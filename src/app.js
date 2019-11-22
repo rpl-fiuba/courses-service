@@ -39,11 +39,11 @@ router.put('/courses/:courseId', coursesController.updateCourse);
 router.delete('/courses/:courseId', coursesController.deleteCourse);
 
 // Users
-router.get('/courses/:courseId/users', usersController.getUsers);
-router.get('/courses/:courseId/users/:userId', usersController.getUser);
-router.post('/courses/:courseId/users', usersController.addUser);
-router.delete('/courses/:courseId/users/:userId', usersController.deleteUser);
+router.get('/courses/:courseId/users', usersController.getUsersFromCourse);
+router.post('/courses/:courseId/users', usersController.addUserToCourse);
+router.delete('/courses/:courseId/users/:userId', usersController.deleteUserFromCourse);
 router.put('/courses/:courseId/users/:userId', usersController.updateUser);
+router.get('/courses/:courseId/users/:userId', usersController.getUser);
 
 // Guides
 router.get('/courses/:courseId/guides', guidesController.getGuides);

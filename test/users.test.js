@@ -16,6 +16,8 @@ describe('Users Tests', () => {
   const token = 'fakeToken';
   let response;
   let user;
+  let expectedUser;
+  let studentProfile;
   let professorProfile;
 
   before(cleanDb);
@@ -27,42 +29,120 @@ describe('Users Tests', () => {
       email: 'licha@gmail',
       role: 'professor'
     };
+    studentProfile = {
+      userId: 'student-id',
+      name: 'Pepito',
+      email: 'student@gmail',
+      role: 'student'
+    };
   });
   afterEach(cleanDb);
 
-  describe('Add User', () => {
-    describe('When the user is correct and doesnt exist', () => {
-      beforeEach(async () => {
-        mocks.mockUsersService({ profile: professorProfile });
+  describe('Add User to course', () => {
+    describe('When the user is student and doesnt exist', () => {
+      describe('when the course does not have password', () => {
+        beforeEach(async () => {
+          mocks.mockUsersService({ profile: studentProfile });
 
-        const coursesAndCreators = await addCourseMocks({
-          coursesNumber: 1,
-          creator: professorProfile
+          const coursesAndCreators = await addCourseMocks({
+            coursesNumber: 1,
+            creator: professorProfile
+          });
+          const { courseId } = coursesAndCreators.courses[0];
+          user = {
+            courseId,
+            role: 'student',
+            userId: studentProfile.userId
+          };
+          expectedUser = user;
+          response = await requests.addUser({ user, token });
         });
-        const { courseId } = coursesAndCreators.courses[0];
-        user = { role: 'student', courseId, userId: token, };
-        response = await requests.addUser({ user, token });
+
+        it('should return status CREATED', () => assert.equal(response.status, 201));
+        it('the user should exist in the db after adding it', async () => {
+          mocks.mockUsersService({ profile: professorProfile });
+
+          response = await requests.getUser({ user, token });
+          assert.deepEqual(response.body, user);
+        });
       });
 
-      it('should return status CREATED', () => assert.equal(response.status, 201));
-      it('the user should exist in the db after adding it', async () => {
-        mocks.mockUsersService({ profile: professorProfile });
+      describe('when the course has password and it is ok', () => {
+        let coursePassword;
 
-        response = await requests.getUser({ user, token });
-        assert.deepEqual(response.body, user);
+        beforeEach(async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+
+          coursePassword = 'passs';
+          const coursesAndCreators = await addCourseMocks({
+            coursesNumber: 1,
+            password: coursePassword,
+            creator: professorProfile
+          });
+          const { courseId } = coursesAndCreators.courses[0];
+          user = {
+            courseId,
+            role: 'student',
+            password: coursePassword,
+            userId: studentProfile.userId
+          };
+          expectedUser = {
+            courseId,
+            role: 'student',
+            userId: studentProfile.userId
+          };
+          response = await requests.addUser({ user, token });
+        });
+
+        it('should return status CREATED', () => assert.equal(response.status, 201));
+        it('the user should exist in the db after adding it', async () => {
+          mocks.mockUsersService({ profile: professorProfile });
+
+          response = await requests.getUser({ user, token });
+          assert.deepEqual(response.body, expectedUser);
+        });
+      });
+
+      describe('when the course has password and it is wrong', () => {
+        let coursePassword;
+
+        beforeEach(async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+
+          coursePassword = 'passs';
+          const coursesAndCreators = await addCourseMocks({
+            coursesNumber: 1,
+            password: coursePassword,
+            creator: professorProfile
+          });
+          const { courseId } = coursesAndCreators.courses[0];
+          user = {
+            courseId,
+            role: 'student',
+            password: 'wrong password',
+            userId: studentProfile.userId
+          };
+          response = await requests.addUser({ user, token });
+        });
+
+        it('should return status CREATED', () => assert.equal(response.status, 409));
       });
     });
 
     describe('When the user already exists', () => {
       beforeEach(async () => {
-        mocks.mockUsersService({ profile: professorProfile, times: 2 });
+        mocks.mockUsersService({ profile: studentProfile, times: 2 });
 
         const coursesAndCreators = await addCourseMocks({
           coursesNumber: 1,
           creator: professorProfile
         });
         const { courseId } = coursesAndCreators.courses[0];
-        user = { role: 'student', courseId, userId: token, };
+        user = {
+          courseId,
+          role: 'student',
+          userId: studentProfile.userId
+        };
         response = await requests.addUser({ user, token });
         response = await requests.addUser({ user, token });
       });
@@ -88,7 +168,8 @@ describe('Users Tests', () => {
       });
     });
 
-  // TODO: who can add users to a course?
+  // TODO: who can add users to a course? if the role is student,
+  // we should check that the same user is added by self as student. If not, the profesor
   });
 
   describe('Delete User', () => {

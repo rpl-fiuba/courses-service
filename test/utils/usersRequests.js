@@ -14,7 +14,11 @@ const addUser = async ({ user, token }) => doRequest({
   requestUrl: `${baseUrl}/courses/${user.courseId}/users`,
   params: {
     method: 'POST',
-    body: JSON.stringify({ userId: user.userId, role: user.role }),
+    body: JSON.stringify({
+      userId: user.userId,
+      role: user.role,
+      password: user.password
+    }),
   },
   token,
 });
