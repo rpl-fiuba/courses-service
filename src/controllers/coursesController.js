@@ -7,10 +7,12 @@ const coursesService = require('../services/coursesService');
  *
  */
 const searchCourses = async (req, res) => {
-  const { page, limit } = req.query;
+  const { page, limit, search } = req.query;
   const { userId } = req.context.user;
 
-  const courses = await coursesService.searchCourses({ page, limit, userId });
+  const courses = await coursesService.searchCourses({
+    page, limit, search, userId
+  });
 
   return res.status(200).json(courses);
 };
@@ -64,6 +66,10 @@ const deleteCourse = async (req, res) => {
   return res.status(204).json({});
 };
 
+/**
+ * Updates an specific course
+ *
+ */
 const updateCourse = async (req, res) => {
   const { userId } = req.context.user;
   const { courseId } = req.params;

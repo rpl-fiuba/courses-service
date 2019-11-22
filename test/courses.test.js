@@ -319,6 +319,85 @@ describe('Course Tests', () => {
 
         it('body is empty', () => assert.deepEqual(response.body, []));
       });
+
+      describe('and searching by name', () => {
+        let am2;
+        let am3;
+        let alg;
+
+        beforeEach(async () => {
+          am2 = 'analisis2';
+          am3 = 'analisis3';
+          alg = 'algebra';
+
+          await addCourseMocks({
+            courseId: am2,
+            name: am2,
+            courseStatus: 'published',
+            creator: professorProfile
+          });
+          await addCourseMocks({
+            courseId: am3,
+            name: am3,
+            courseStatus: 'published',
+            creator: professorProfile
+          });
+          await addCourseMocks({
+            courseId: alg,
+            name: alg,
+            courseStatus: 'published',
+            creator: professorProfile
+          });
+        });
+
+        it('search by "analisis"', async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          response = await requests.searchCourses({ token, search: 'analisis' });
+          const courseIds = response.body.map((c) => c.courseId);
+
+          assert.deepEqual(courseIds, [am3, am2]);
+        });
+
+        it('search by "analisis2"', async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          response = await requests.searchCourses({ token, search: 'analisis2' });
+          const courseIds = response.body.map((c) => c.courseId);
+
+          assert.deepEqual(courseIds, [am2]);
+        });
+
+        it('search by "ANALISIS2"', async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          response = await requests.searchCourses({ token, search: 'ANALISIS2' });
+          const courseIds = response.body.map((c) => c.courseId);
+
+          assert.deepEqual(courseIds, [am2]);
+        });
+
+        it('search by "algeb"', async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          response = await requests.searchCourses({ token, search: 'algeb' });
+          const courseIds = response.body.map((c) => c.courseId);
+
+          assert.deepEqual(courseIds, [alg]);
+        });
+
+        it('search by "a"', async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          response = await requests.searchCourses({ token, search: 'a' });
+          const courseIds = response.body.map((c) => c.courseId);
+
+          assert.deepEqual(courseIds, [alg, am3, am2]);
+        });
+
+        it('search by "none"', async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          response = await requests.searchCourses({ token, search: 'none' });
+          const courseIds = response.body.map((c) => c.courseId);
+
+          assert.deepEqual(courseIds, []);
+        });
+      });
     });
 
     describe('When the user does not have courses', () => {

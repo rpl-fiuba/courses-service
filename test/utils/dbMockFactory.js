@@ -4,9 +4,15 @@ const knex = require('knex')(configs.db); // eslint-disable-line
 
 const arrayWithKeys = (keysAmount) => [...Array(keysAmount).keys()];
 
-const courseMock = ({ index, courseStatus, password }) => snakelize({
-  courseId: `coursename${index}`,
-  name: `course name ${index}`,
+const courseMock = ({
+  index,
+  name,
+  courseId,
+  password,
+  courseStatus
+}) => snakelize({
+  courseId: courseId || `coursename${index}`,
+  name: name || `course name ${index}`,
   description: `course description ${index}`,
   courseStatus,
   password
@@ -49,12 +55,21 @@ const addGuideMocks = async ({ courseId, guidesAmount }) => {
 };
 
 const addCourseMocks = async ({
-  coursesNumber, courseStatus, password, creator
+  coursesNumber = 1,
+  courseStatus,
+  password,
+  courseId,
+  creator,
+  name
 }) => {
   // first create courses
-  const courses = arrayWithKeys(coursesNumber).map(
-    (index) => courseMock({ index, courseStatus, password })
-  );
+  const courses = arrayWithKeys(coursesNumber).map((index) => courseMock({
+    index,
+    name,
+    courseId,
+    password,
+    courseStatus,
+  }));
   await knex('courses').insert(courses);
 
   // then the creator is created

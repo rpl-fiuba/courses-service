@@ -47,6 +47,7 @@ const getUserCourses = async ({
 const searchCourses = async ({
   offset,
   limit,
+  search,
   userId
 }) => knex(COURSES_TABLE)
   .select(VISIBLE_FIELDS_TO_RETURN)
@@ -59,6 +60,9 @@ const searchCourses = async ({
           .where('user_id', userId)
           .whereRaw('course_users.course_id = courses.course_id');
       });
+    }
+    if (search) {
+      queryBuilder.whereRaw('lower(name) ~ lower(?)', search);
     }
   })
   .offset(offset || configs.dbDefault.offset)

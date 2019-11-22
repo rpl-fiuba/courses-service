@@ -6,8 +6,8 @@ const status = () => {
   return fetch(statusUrl);
 };
 
-const searchCourses = async ({ token }) => doRequest({
-  requestUrl: `${baseUrl}/courses/search`,
+const searchCourses = async ({ token, search = '' }) => doRequest({
+  requestUrl: `${baseUrl}/courses/search?search=${search}`,
   token,
 });
 

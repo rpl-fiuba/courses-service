@@ -100,8 +100,15 @@ const updateCourse = async ({
  * Search published courses
  *
  */
-const searchCourses = async ({ page, limit, userId }) => {
-  const courses = await coursesDb.searchCourses({ offset: page * limit, limit, userId });
+const searchCourses = async ({
+  page, limit, search, userId
+}) => {
+  const courses = await coursesDb.searchCourses({
+    offset: page * limit,
+    limit,
+    search,
+    userId
+  });
 
   if (!courses.length) {
     return courses;
