@@ -1,6 +1,7 @@
+// TODO: get it from  env
 const resolveDbHost = () => {
   const { DOCKER } = process.env;
-  return DOCKER ? 'db' : 'localhost';
+  return DOCKER ? 'courses-db' : 'localhost';
 };
 
 module.exports = {

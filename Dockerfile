@@ -6,3 +6,5 @@ ADD . /code
 WORKDIR /code
 RUN npm install
 EXPOSE 5001
+ENV DOCKER true
+CMD ["npm", "run", "start"]
