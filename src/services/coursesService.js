@@ -17,8 +17,11 @@ const getCourse = async ({ courseId, userId }) => {
   // TODO: Estaria bueno que la query incluya las guias
   const course = await coursesDb.getCourse({ courseId });
   const coursesWithProfessors = await coursesDb.includeProfessorsToCourses({ courses: [course] });
+  const withProfessorsAndGuides = await coursesDb.includeGuidesToCourses({
+    courses: coursesWithProfessors,
+  });
 
-  return coursesWithProfessors[0];
+  return withProfessorsAndGuides[0];
 };
 
 /**

@@ -35,7 +35,6 @@ const addGuide = async ({
       + `to create guides for the course with id ${courseId}`
     ));
   }
-
   const guideId = name.toLowerCase().replace(' ', '');
   const guide = {
     guideId,

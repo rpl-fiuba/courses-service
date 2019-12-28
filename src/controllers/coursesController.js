@@ -83,7 +83,7 @@ const updateCourse = async (req, res) => {
     courseId, name, description, userId
   });
 
-  return res.status(200).json(updatedCourse);
+  return res.status(200).json(updatedCourse[0]);
 };
 
 /**
