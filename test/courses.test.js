@@ -3,7 +3,7 @@ const { assert, expect } = require('chai');
 const requests = require('./utils/coursesRequests');
 const { cleanDb, sanitizeResponse } = require('./utils/db');
 const mocks = require('./utils/mocks');
-const { addCourseMocks } = require('./utils/dbMockFactory');
+const { addCourseMocks, addCourseUserMocks } = require('./utils/dbMockFactory');
 
 process.env.NODE_ENV = 'test';
 
@@ -42,21 +42,16 @@ describe('Course Tests', () => {
 
   describe('Add course', () => {
     describe('When is successfully added', () => {
-      let courseWithProfessors;
+      let createdCourse;
 
       beforeEach(async () => {
         mocks.mockUsersService({ profile: professorProfile });
-        courseWithProfessors = {
+        createdCourse = {
           ...course,
           userId: professorProfile.userId,
           password: 'secret',
           courseStatus: 'draft',
-          role: 'creator',
-          professors: [{
-            courseId: course.courseId,
-            role: 'creator',
-            userId: professorProfile.userId
-          }]
+          role: 'creator'
         };
         response = await requests.addCourse({ token, course: { ...course, password: 'secret' } });
       });
@@ -64,16 +59,21 @@ describe('Course Tests', () => {
       it('status is OK', () => assert.equal(response.status, 201));
 
       it('body has the created course is OK', () => {
-        expect(sanitizeResponse(response.body)).to.deep.equal(courseWithProfessors);
+        expect(sanitizeResponse(response.body)).to.deep.equal(createdCourse);
       });
 
       it('get course should return the course added', async () => {
         mocks.mockUsersService({ profile: professorProfile });
+        mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
 
+        const expectedCourses = [{
+          ...createdCourse,
+          professors: [professorProfile]
+        }];
         response = await requests.getUserCourses({ token });
         courses = response.body;
 
-        expect(sanitizeResponse(courses)).to.deep.include(courseWithProfessors);
+        expect(sanitizeResponse(courses)).to.deep.equal(expectedCourses);
       });
     });
 
@@ -152,6 +152,7 @@ describe('Course Tests', () => {
 
       beforeEach(async () => {
         mocks.mockUsersService({ profile: professorProfile });
+        mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
 
         const coursesAndCreators = await addCourseMocks({
           coursesNumber: 1,
@@ -161,12 +162,56 @@ describe('Course Tests', () => {
           ...coursesAndCreators.courses[0],
           courseStatus: 'draft',
           password: null,
-          professors: [{
-            courseId: coursesAndCreators.courses[0].courseId,
-            role: 'creator',
-            userId: professorProfile.userId
+          guides: [],
+          users: [{
+            ...professorProfile,
+            role: 'creator'
           }]
         };
+        response = await requests.getCourse({ token, course: expectedCourse });
+      });
+
+      it('status is OK', () => assert.equal(response.status, 200));
+
+      it('body is the course', () => assert.deepEqual(sanitizeResponse(response.body), expectedCourse));
+    });
+
+    describe('When the course exists and has users', () => {
+      let expectedCourse;
+      let studentProfiles;
+
+      beforeEach(async () => {
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
+        const createdCourse = coursesAndCreators.courses[0];
+        const students = await addCourseUserMocks({
+          courseId: createdCourse.courseId, usersAmount: 3, role: 'student'
+        });
+        studentProfiles = students.map((u) => ({
+          userId: u.userId,
+          role: u.role,
+          email: 'mock@email',
+          name: 'mock'
+        }));
+
+        expectedCourse = {
+          ...coursesAndCreators.courses[0],
+          courseStatus: 'draft',
+          password: null,
+          guides: [],
+          users: [...studentProfiles, { ...professorProfile, role: 'creator' }]
+        };
+      });
+
+      beforeEach(async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+        mocks.mockUsersBulk({
+          users: [professorProfile, ...studentProfiles],
+          userProfiles: [...studentProfiles, professorProfile]
+        });
+
         response = await requests.getCourse({ token, course: expectedCourse });
       });
 
@@ -192,6 +237,7 @@ describe('Course Tests', () => {
       describe('and the courses belongs to the user', () => {
         beforeEach(async () => {
           mocks.mockUsersService({ profile: professorProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
 
           const coursesAndCreators = await addCourseMocks({
             coursesNumber: 3,
@@ -203,11 +249,7 @@ describe('Course Tests', () => {
             courseStatus: 'draft',
             userId: professorProfile.userId,
             role: 'creator',
-            professors: [{
-              courseId: $course.courseId,
-              userId: professorProfile.userId,
-              role: 'creator'
-            }]
+            professors: [professorProfile]
           }));
           response = await requests.getUserCourses({ token });
         });
@@ -283,6 +325,7 @@ describe('Course Tests', () => {
 
         beforeEach(async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
 
           const coursesAndCreators = await addCourseMocks({
             coursesNumber: 3,
@@ -292,11 +335,7 @@ describe('Course Tests', () => {
           expectedCourses = coursesAndCreators.courses.map(($course) => ({
             ..._.omit($course, ['password']),
             courseStatus: 'published',
-            professors: [{
-              courseId: $course.courseId,
-              userId: professorProfile.userId,
-              role: 'creator'
-            }]
+            professors: [professorProfile]
           }));
           response = await requests.searchCourses({ token });
         });
@@ -307,6 +346,7 @@ describe('Course Tests', () => {
       describe('and they has been published but the user is already matriculated', () => {
         beforeEach(async () => {
           mocks.mockUsersService({ profile: professorProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
 
           await addCourseMocks({
             coursesNumber: 3,
@@ -352,6 +392,8 @@ describe('Course Tests', () => {
 
         it('search by "analisis"', async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
           response = await requests.searchCourses({ token, search: 'analisis' });
           const courseIds = response.body.map((c) => c.courseId);
 
@@ -360,6 +402,8 @@ describe('Course Tests', () => {
 
         it('search by "analisis2"', async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
           response = await requests.searchCourses({ token, search: 'analisis2' });
           const courseIds = response.body.map((c) => c.courseId);
 
@@ -368,6 +412,8 @@ describe('Course Tests', () => {
 
         it('search by "ANALISIS2"', async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
           response = await requests.searchCourses({ token, search: 'ANALISIS2' });
           const courseIds = response.body.map((c) => c.courseId);
 
@@ -376,6 +422,8 @@ describe('Course Tests', () => {
 
         it('search by "algeb"', async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
           response = await requests.searchCourses({ token, search: 'algeb' });
           const courseIds = response.body.map((c) => c.courseId);
 
@@ -384,6 +432,8 @@ describe('Course Tests', () => {
 
         it('search by "a"', async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
           response = await requests.searchCourses({ token, search: 'a' });
           const courseIds = response.body.map((c) => c.courseId);
 
@@ -392,6 +442,8 @@ describe('Course Tests', () => {
 
         it('search by "none"', async () => {
           mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
           response = await requests.searchCourses({ token, search: 'none' });
           const courseIds = response.body.map((c) => c.courseId);
 
@@ -448,11 +500,11 @@ describe('Course Tests', () => {
           name,
           description,
           password: null,
+          guides: [],
           courseStatus: 'draft',
-          professors: [{
-            courseId: firstCourse.courseId,
-            role: 'creator',
-            userId: professorProfile.userId
+          users: [{
+            ...professorProfile,
+            role: 'creator'
           }]
         };
 
@@ -463,6 +515,7 @@ describe('Course Tests', () => {
 
       it('get course should return the course updated', async () => {
         mocks.mockUsersService({ profile: professorProfile });
+        mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
 
         response = await requests.getCourse({ course: finalCourse, token });
         assert.deepEqual(sanitizeResponse(response.body), finalCourse);

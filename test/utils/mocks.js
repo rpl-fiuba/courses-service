@@ -11,6 +11,18 @@ const mockUsersService = ({ status = 200, profile = {}, times = 1 }) => {
     .reply(status, profile);
 };
 
+const mockUsersBulk = ({
+  status = 200, users, userProfiles, times = 1
+}) => {
+  const userIds = users.map((user) => ({ id: user.userId }));
+
+  nock(usersServiceUrl)
+    .post('/users/profile', { userIds })
+    .times(times)
+    .reply(status, userProfiles);
+};
+
 module.exports = {
+  mockUsersBulk,
   mockUsersService
 };

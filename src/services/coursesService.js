@@ -1,12 +1,13 @@
 const createError = require('http-errors');
 const coursesDb = require('../databases/coursesDb');
 const usersService = require('./usersService');
+const guidesService = require('./guidesService');
 
 /**
  * Get an specific course for the user
  *
  */
-const getCourse = async ({ courseId, userId }) => {
+const getCourse = async ({ context, courseId, userId }) => {
   const user = await usersService.getUser({ courseId, userId });
 
   if (!user) {
@@ -14,14 +15,11 @@ const getCourse = async ({ courseId, userId }) => {
       `The user with id ${userId} dont belong to the course with id ${courseId}`
     ));
   }
-  // TODO: Estaria bueno que la query incluya las guias
   const course = await coursesDb.getCourse({ courseId });
-  const coursesWithProfessors = await coursesDb.includeProfessorsToCourses({ courses: [course] });
-  const withProfessorsAndGuides = await coursesDb.includeGuidesToCourses({
-    courses: coursesWithProfessors,
-  });
+  const users = await usersService.getUsersFromCourse({ context, courseId });
+  const guides = await guidesService.getGuides({ courseId });
 
-  return withProfessorsAndGuides[0];
+  return { ...course, guides, users };
 };
 
 /**
@@ -29,16 +27,14 @@ const getCourse = async ({ courseId, userId }) => {
  *
  */
 const getUserCourses = async ({
-  page,
-  limit,
-  userId
+  context, page, limit, userId
 }) => {
   const courses = await coursesDb.getUserCourses({ page, limit, userId });
 
   if (!courses.length) {
     return courses;
   }
-  return coursesDb.includeProfessorsToCourses({ courses });
+  return includeProfessorsToCourses({ context, courses });
 };
 
 /**
@@ -58,11 +54,7 @@ const addCourse = async ({
     courseId,
   });
 
-  const coursesWithProfessors = await coursesDb.includeProfessorsToCourses({
-    courses: [createdCourse]
-  });
-
-  return coursesWithProfessors[0];
+  return createdCourse;
 };
 
 /**
@@ -84,10 +76,6 @@ const deleteCourse = async ({ userId, courseId }) => {
 const updateCourse = async ({
   courseId, userId, description, name
 }) => {
-  if (!await doesCourseExists({ courseId })) {
-    return Promise.reject(createError.NotFound(`Course with id ${courseId} not found`));
-  }
-
   const isCreator = await usersService.isCreator({ userId, courseId });
   if (!isCreator) {
     return Promise.reject(createError.Forbidden());
@@ -104,7 +92,7 @@ const updateCourse = async ({
  *
  */
 const searchCourses = async ({
-  page, limit, search, userId
+  context, page, limit, search, userId
 }) => {
   const courses = await coursesDb.searchCourses({
     offset: page * limit,
@@ -116,18 +104,34 @@ const searchCourses = async ({
   if (!courses.length) {
     return courses;
   }
-  return coursesDb.includeProfessorsToCourses({ courses });
+  return includeProfessorsToCourses({ context, courses });
 };
 
 
-const doesCourseExists = async ({ courseId }) => coursesDb.getCourse({ courseId })
-  .then(() => true)
-  .catch(() => false);
+const includeProfessorsToCourses = async ({ context, courses }) => {
+  const coursesWithProfessors = await coursesDb.includeProfessorsToCourses({ courses });
 
+  const professorIds = coursesWithProfessors.reduce((acum, course) => {
+    const profUserIds = course.professors.map((prof) => ({ id: prof.userId }));
+    return [...acum, ...profUserIds];
+  }, []);
+
+  const allUsers = await usersService.getUsersFromIds({ context, userIds: professorIds });
+
+  return coursesWithProfessors.map((course) => {
+    const professors = course.professors.map((profesor) => (
+      allUsers.find((user) => user.userId === profesor.userId)
+    ));
+
+    return {
+      ...course,
+      professors
+    };
+  });
+};
 
 module.exports = {
   addCourse,
-  doesCourseExists,
   getCourse,
   getUserCourses,
   deleteCourse,

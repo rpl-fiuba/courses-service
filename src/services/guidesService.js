@@ -1,6 +1,5 @@
 const createError = require('http-errors');
 const guidesDb = require('../databases/guidesDb');
-const coursesService = require('./coursesService');
 const usersService = require('./usersService');
 
 /**
@@ -23,11 +22,6 @@ const addGuide = async ({
   description,
   userId,
 }) => {
-  const doesCourseExist = await coursesService.doesCourseExists({ courseId });
-  if (!doesCourseExist) {
-    return Promise.reject(createError.BadRequest(`course with id: ${courseId} does not exist`));
-  }
-
   const hasEditPermission = await usersService.hasEditPermission({ courseId, userId });
   if (!hasEditPermission) {
     return Promise.reject(createError.Forbidden(
@@ -67,10 +61,6 @@ const updateGuide = async ({
   description,
   userId,
 }) => {
-  const doesCourseExist = await coursesService.doesCourseExists({ courseId });
-  if (!doesCourseExist) {
-    return Promise.reject(createError.NotFound(`Course with id: ${courseId} not found`));
-  }
   if (!await doesGuideExists({ courseId, guideId })) {
     return Promise.reject(createError.NotFound(
       `Guide with id ${guideId} not found for course with id ${courseId}`

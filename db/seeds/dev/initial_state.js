@@ -9,7 +9,7 @@ exports.seed = async (knex) => {
     user_id: '111975156652135962164'
   };
   const diego = {
-    user_id: 'diego-id'
+    user_id: '117307029770597899245'
   };
   const mendez = {
     user_id: 'mendez-id'

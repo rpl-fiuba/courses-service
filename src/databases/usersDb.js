@@ -11,9 +11,9 @@ const COURSE_USERS_TABLE = 'course_users';
  *
  */
 const getUsers = async ({ courseId, limit, offset }) => knex(COURSE_USERS_TABLE)
-  .select()
+  .select('user_id', 'role')
   .where(snakelize({ courseId }))
-  .limit(limit || configs.dbDefault.limit)
+  .limit(limit || configs.dbDefault.limit) // TODO: con null funciona?
   .offset(offset || configs.dbDefault.offset)
   .then(processDbResponse)
   .then((response) => {

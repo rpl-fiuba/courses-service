@@ -7,11 +7,12 @@ const coursesService = require('../services/coursesService');
  *
  */
 const searchCourses = async (req, res) => {
+  const { context } = req;
   const { page, limit, search } = req.query;
-  const { userId } = req.context.user;
+  const { userId } = context.user;
 
   const courses = await coursesService.searchCourses({
-    page, limit, search, userId
+    context, page, limit, search, userId
   });
 
   return res.status(200).json(courses);
@@ -22,10 +23,11 @@ const searchCourses = async (req, res) => {
  *
  */
 const getCourse = async (req, res) => {
+  const { context } = req;
   const { courseId } = req.params;
-  const { userId } = req.context.user;
+  const { userId } = context.user;
 
-  const course = await coursesService.getCourse({ courseId, userId });
+  const course = await coursesService.getCourse({ context, courseId, userId });
 
   return res.status(200).json(course);
 };
@@ -91,9 +93,12 @@ const updateCourse = async (req, res) => {
  *
  */
 const getUserCourses = async (req, res) => {
-  const { userId } = req.context.user;
+  const { context } = req;
+  const { userId } = context.user;
   const { page, limit } = req.query;
-  const userCourses = await coursesService.getUserCourses({ page, limit, userId });
+  const userCourses = await coursesService.getUserCourses({
+    context, page, limit, userId
+  });
 
   return res.status(200).json(userCourses);
 };

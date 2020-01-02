@@ -7,7 +7,6 @@ const knex = require('knex')(configs.db); // eslint-disable-line
 
 const COURSES_TABLE = 'courses';
 const COURSE_USERS_TABLE = 'course_users';
-const GUIDES_TABLE = 'guides';
 
 const VISIBLE_FIELDS_TO_RETURN = [
   'course_id',
@@ -175,22 +174,10 @@ const includeProfessorsToCourses = async ({ courses }) => {
   }));
 };
 
-const includeGuidesToCourses = async ({ courses }) => {
-  const courseIds = courses.map((course) => course.courseId);
-
-  const allGuides = await knex(GUIDES_TABLE)
-    .select()
-    .whereIn('course_id', courseIds)
-    .then(processDbResponse);
-
-  const guidesByCourse = _.groupBy(allGuides, 'courseId');
-
-  return courses.map((course) => ({
-    ...course,
-    guides: guidesByCourse[course.courseId]
-  }));
-};
-
+/**
+ * Inserts a new course
+ *
+ */
 const insertNewCourse = ({
   trx,
   name,
@@ -221,7 +208,6 @@ module.exports = {
   getCourse,
   deleteCourse,
   includeProfessorsToCourses,
-  includeGuidesToCourses,
   searchCourses,
   updateCourse,
 };

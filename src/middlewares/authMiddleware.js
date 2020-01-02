@@ -12,11 +12,11 @@ module.exports = async (req, res, next) => {
     next(createError.BadRequest('Authorization has not been provided'));
   }
 
-  const user = await usersClient.authenticate({ context: req.context });
-  if (!user) {
-    return Promise.reject(createError.Unauthorized());
+  try {
+    const user = await usersClient.authenticate({ context: req.context });
+    req.context.user = user;
+    next();
+  } catch (err) {
+    next(err);
   }
-  req.context.user = user;
-
-  return next();
 };

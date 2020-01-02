@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 
 const configs = require('./configs')();
 const errorMiddleware = require('./middlewares/errorMiddleware');
+const courseCheckMiddleware = require('./middlewares/courseCheckMiddleware');
 const initialMiddleware = require('./middlewares/initialMiddleware');
 const requestLoggerMiddleware = require('./middlewares/requestLoggerMiddleware');
 const authMiddleware = require('./middlewares/authMiddleware');
@@ -34,6 +35,9 @@ router.use(authMiddleware);
 router.get('/courses/search', coursesController.searchCourses);
 router.get('/courses', coursesController.getUserCourses);
 router.post('/courses', coursesController.addCourse);
+
+router.use('/courses/:courseId/', courseCheckMiddleware);
+
 router.get('/courses/:courseId', coursesController.getCourse);
 router.put('/courses/:courseId', coursesController.updateCourse);
 router.delete('/courses/:courseId', coursesController.deleteCourse);

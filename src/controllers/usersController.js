@@ -3,9 +3,9 @@ const createError = require('http-errors');
 const usersService = require('../services/usersService');
 
 const getUsersFromCourse = async (req, res) => {
+  const { context } = req;
   const { courseId } = req.params;
-  // TODO: return just user ids? or get the info from users service
-  const users = await usersService.getUsersFromCourse({ courseId });
+  const users = await usersService.getUsersFromCourse({ context, courseId });
 
   return res.status(200).json(users);
 };

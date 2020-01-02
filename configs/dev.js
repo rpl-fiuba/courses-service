@@ -43,7 +43,8 @@ module.exports = {
         port: '7000'
       },
       paths: {
-        auth: 'login'
+        auth: 'login',
+        users: 'users/profile'
       }
     },
   }

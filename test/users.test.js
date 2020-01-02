@@ -245,28 +245,33 @@ describe('Users Tests', () => {
 
   describe('Get Users', () => {
     describe('When there are courses', () => {
-      let expectedUsers;
       let courseId;
+      let userProfiles;
 
       // Set up database
       beforeEach(async () => {
         mocks.mockUsersService({ profile: professorProfile });
 
         const coursesAndCreators = await addCourseMocks({
-          coursesNumber: 1,
-          creator: professorProfile
+          coursesNumber: 1, creator: professorProfile
         });
         courseId = coursesAndCreators.courses[0].courseId;
-        const creator = coursesAndCreators.creators.filter((c) => c.courseId === courseId)[0];
+
         const mockUsers = await addCourseUserMocks({ courseId, usersAmount: 3, role: 'student' });
-        expectedUsers = [creator];
-        mockUsers.forEach((u) => expectedUsers.push(u));
+        userProfiles = mockUsers.map((u) => ({
+          userId: u.userId,
+          role: u.role,
+          email: 'mock@email',
+          name: 'mock'
+        }));
+        mocks.mockUsersBulk({ users: [professorProfile, ...mockUsers], userProfiles });
+
         response = await requests.getUsers({ token, courseId });
       });
 
       it('status is OK', () => assert.equal(response.status, 200));
 
-      it('body has the course', () => expect(response.body).to.deep.equalInAnyOrder(expectedUsers));
+      it('body has the expected users', () => expect(response.body).to.deep.equalInAnyOrder(userProfiles));
     });
   });
 });

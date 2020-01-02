@@ -31,6 +31,7 @@ describe('Guides Tests', () => {
       coursesNumber: 1,
       creator: professorProfile
     });
+
     courseId = coursesAndCreators.courses[0].courseId;
     guide = {
       courseId,
@@ -66,7 +67,7 @@ describe('Guides Tests', () => {
         response = await requests.addGuide({ courseId: guide.courseId, token, guide });
       });
 
-      it('should return BAD REQUEST', () => assert.equal(response.status, 400));
+      it('should return NOT FOUND', () => assert.equal(response.status, 404));
     });
 
     describe('When the user do not have permissions over the course', () => {
@@ -163,7 +164,7 @@ describe('Guides Tests', () => {
       it('should return the existing guides', () => {
         const expectedGuides = guides.map(($guide) => ({
           ...$guide,
-          guideStatus: 'draft' // TODO: NO LE PONDRIA STATUS A LAS GUIDES
+          guideStatus: 'draft'
         }));
         assert.deepEqual(sanitizeResponse(response.body), expectedGuides);
       });
@@ -173,7 +174,7 @@ describe('Guides Tests', () => {
       beforeEach(async () => {
         mocks.mockUsersService({ profile: professorProfile });
 
-        response = await requests.getGuides({ courseId: 'id', token });
+        response = await requests.getGuides({ courseId, token });
       });
 
       it('should return OK', () => assert.equal(response.status, 200));

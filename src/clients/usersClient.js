@@ -18,6 +18,24 @@ const authenticate = async ({ context }) => {
   return requestUtils.processResponse(response);
 };
 
+const getUsersAsBulk = async ({ context, userIds }) => {
+  const usersPath = configs.services.usersService.paths.users;
+  const usersUrl = `${usersServiceUrl}/${usersPath}`;
+
+  const response = await fetch(usersUrl, {
+    headers: {
+      Authorization: context.accessToken,
+      'Content-Type': 'application/json'
+    },
+    method: 'post',
+    body: JSON.stringify({ userIds })
+  });
+
+  return requestUtils.processResponse(response);
+};
+
+
 module.exports = {
-  authenticate
+  authenticate,
+  getUsersAsBulk
 };
