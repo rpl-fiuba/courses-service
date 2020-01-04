@@ -3,6 +3,8 @@ const coursesDb = require('../databases/coursesDb');
 const usersService = require('./usersService');
 const guidesService = require('./guidesService');
 
+const PROFESSOR_ROLES = ['professor', 'creator'];
+
 /**
  * Get an specific course for the user
  *
@@ -16,10 +18,13 @@ const getCourse = async ({ context, courseId, userId }) => {
     ));
   }
   const course = await coursesDb.getCourse({ courseId });
-  const users = await usersService.getUsersFromCourse({ context, courseId });
   const guides = await guidesService.getGuides({ courseId });
+  const users = await usersService.getUsersFromCourse({ context, courseId });
+  const professors = users.filter((u) => PROFESSOR_ROLES.includes(u.role));
 
-  return { ...course, guides, users };
+  return {
+    ...course, guides, users, professors
+  };
 };
 
 /**
@@ -42,19 +47,18 @@ const getUserCourses = async ({
  *
  */
 const addCourse = async ({
-  description, name, password, creatorId
+  context, description, name, password, creatorId
 }) => {
   const courseId = name.toLowerCase().replace(' ', '-');
 
   const createdCourse = await coursesDb.addCourse({
-    name,
-    password,
-    description,
-    creatorId,
-    courseId,
+    name, password, description, creatorId, courseId
   });
+  const users = [{ ...context.user, role: 'creator' }];
 
-  return createdCourse;
+  return {
+    ...createdCourse, users, professors: users, guides: []
+  };
 };
 
 /**

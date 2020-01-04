@@ -25,7 +25,7 @@ const getUserCourses = async ({
   page,
   limit
 }) => knex
-  .select()
+  .select('courses.*')
   .from(COURSE_USERS_TABLE)
   .where(snakelize({ userId }))
   .leftJoin(COURSES_TABLE, 'courses.course_id', 'course_users.course_id')
@@ -118,11 +118,7 @@ const addCourse = async ({
   });
   await trx.commit();
 
-  return {
-    ...createdCourse[0],
-    role: 'creator',
-    userId: creatorId
-  };
+  return createdCourse[0];
 };
 
 /**

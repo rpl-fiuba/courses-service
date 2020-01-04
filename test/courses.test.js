@@ -43,23 +43,28 @@ describe('Course Tests', () => {
   describe('Add course', () => {
     describe('When is successfully added', () => {
       let createdCourse;
+      let expectedCourse;
 
       beforeEach(async () => {
         mocks.mockUsersService({ profile: professorProfile });
         createdCourse = {
           ...course,
-          userId: professorProfile.userId,
           password: 'secret',
-          courseStatus: 'draft',
-          role: 'creator'
+          courseStatus: 'draft'
         };
-        response = await requests.addCourse({ token, course: { ...course, password: 'secret' } });
+        expectedCourse = {
+          ...createdCourse,
+          guides: [],
+          users: [{ ...professorProfile, role: 'creator' }],
+          professors: [{ ...professorProfile, role: 'creator' }]
+        };
+        response = await requests.addCourse({ token, course: createdCourse });
       });
 
       it('status is OK', () => assert.equal(response.status, 201));
 
       it('body has the created course is OK', () => {
-        expect(sanitizeResponse(response.body)).to.deep.equal(createdCourse);
+        expect(sanitizeResponse(response.body)).to.deep.equal(expectedCourse);
       });
 
       it('get course should return the course added', async () => {
@@ -166,6 +171,10 @@ describe('Course Tests', () => {
           users: [{
             ...professorProfile,
             role: 'creator'
+          }],
+          professors: [{
+            ...professorProfile,
+            role: 'creator'
           }]
         };
         response = await requests.getCourse({ token, course: expectedCourse });
@@ -179,6 +188,7 @@ describe('Course Tests', () => {
     describe('When the course exists and has users', () => {
       let expectedCourse;
       let studentProfiles;
+      let professorProfiles;
 
       beforeEach(async () => {
         const coursesAndCreators = await addCourseMocks({
@@ -195,21 +205,23 @@ describe('Course Tests', () => {
           email: 'mock@email',
           name: 'mock'
         }));
+        professorProfiles = [{ ...professorProfile, role: 'creator' }];
 
         expectedCourse = {
           ...coursesAndCreators.courses[0],
           courseStatus: 'draft',
           password: null,
           guides: [],
-          users: [...studentProfiles, { ...professorProfile, role: 'creator' }]
+          users: [...professorProfiles, ...studentProfiles],
+          professors: professorProfiles
         };
       });
 
       beforeEach(async () => {
         mocks.mockUsersService({ profile: professorProfile });
         mocks.mockUsersBulk({
-          users: [professorProfile, ...studentProfiles],
-          userProfiles: [...studentProfiles, professorProfile]
+          users: [...professorProfiles, ...studentProfiles],
+          userProfiles: [...professorProfiles, ...studentProfiles]
         });
 
         response = await requests.getCourse({ token, course: expectedCourse });
@@ -247,8 +259,6 @@ describe('Course Tests', () => {
             ...$course,
             password: null,
             courseStatus: 'draft',
-            userId: professorProfile.userId,
-            role: 'creator',
             professors: [professorProfile]
           }));
           response = await requests.getUserCourses({ token });
@@ -503,6 +513,10 @@ describe('Course Tests', () => {
           guides: [],
           courseStatus: 'draft',
           users: [{
+            ...professorProfile,
+            role: 'creator'
+          }],
+          professors: [{
             ...professorProfile,
             role: 'creator'
           }]

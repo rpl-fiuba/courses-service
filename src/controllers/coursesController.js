@@ -37,7 +37,8 @@ const getCourse = async (req, res) => {
  *
  */
 const addCourse = async (req, res) => {
-  const { userId } = req.context.user;
+  const { context } = req;
+  const { userId } = context.user;
   const { name, description, password } = req.body;
 
   if (!name || !description) {
@@ -46,6 +47,7 @@ const addCourse = async (req, res) => {
 
   const creatorId = userId;
   const createdCourse = await coursesService.addCourse({
+    context,
     name,
     password,
     description,
