@@ -77,7 +77,7 @@ const deleteCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
   const { userId } = req.context.user;
   const { courseId } = req.params;
-  const { name, description } = req.body;
+  const { name, description } = req.body; // TODO: handlear si mandan uno y otro no
 
   if (!name || !description) {
     return Promise.reject(createError.BadRequest('name or description not provided'));
@@ -88,6 +88,20 @@ const updateCourse = async (req, res) => {
   });
 
   return res.status(200).json(updatedCourse[0]);
+};
+
+/**
+ * Publish an specific course
+ *
+ */
+const publishCourse = async (req, res) => {
+  const { userId } = req.context.user;
+  const { courseId } = req.params;
+
+  // TODO: podríamos agregar chequeos de si se puede publicar el curso
+  const updatedCourse = await coursesService.publishCourse({ courseId, userId });
+
+  return res.status(200).json(updatedCourse);
 };
 
 /**
@@ -109,8 +123,9 @@ const getUserCourses = async (req, res) => {
 module.exports = expressify({
   addCourse,
   getCourse,
+  publishCourse,
   searchCourses,
   updateCourse,
   deleteCourse,
-  getUserCourses,
+  getUserCourses
 });

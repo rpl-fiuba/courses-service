@@ -564,4 +564,58 @@ describe('Course Tests', () => {
       it('should return NOT FOUND', () => assert.equal(response.status, 404));
     });
   });
+
+  describe('Publish course', () => {
+    let createdCourse;
+
+    describe('When the course exists', () => {
+      beforeEach(async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+
+        const coursesAndCreators = await addCourseMocks({
+          coursesNumber: 1,
+          creator: professorProfile
+        });
+        [createdCourse] = coursesAndCreators.courses;
+
+        response = await requests.publishCourse({ course: createdCourse, token });
+      });
+
+      it('should return status OK', () => assert.equal(response.status, 200));
+
+      it('get course should return the course updated', async () => {
+        mocks.mockUsersService({ profile: professorProfile });
+        mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
+        const expectedCourse = {
+          ...createdCourse,
+          password: null,
+          guides: [],
+          courseStatus: 'published',
+          users: [{
+            ...professorProfile,
+            role: 'creator'
+          }],
+          professors: [{
+            ...professorProfile,
+            role: 'creator'
+          }]
+        };
+
+        response = await requests.getCourse({ course: createdCourse, token });
+        assert.deepEqual(sanitizeResponse(response.body), expectedCourse);
+      });
+
+      it('search course should find it', () => {
+        beforeEach(async () => {
+          mocks.mockUsersService({ profile: studentProfile });
+          mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
+          response = await requests.searchCourses({ token });
+        });
+
+        it('body has the published', () => assert.deepEqual(sanitizeResponse(response.body[0].courseId), createdCourse.courseId));
+      });
+    });
+  });
 });

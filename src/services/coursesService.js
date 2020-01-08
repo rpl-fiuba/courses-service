@@ -66,8 +66,8 @@ const addCourse = async ({
  *
  */
 const deleteCourse = async ({ userId, courseId }) => {
-  const isCreator = await usersService.isCreator({ userId, courseId });
-  if (!isCreator) {
+  const isProfessor = await usersService.isProfessor({ userId, courseId });
+  if (!isProfessor) {
     return Promise.reject(createError.Forbidden());
   }
   return coursesDb.deleteCourse({ courseId });
@@ -80,15 +80,27 @@ const deleteCourse = async ({ userId, courseId }) => {
 const updateCourse = async ({
   courseId, userId, description, name
 }) => {
-  const isCreator = await usersService.isCreator({ userId, courseId });
-  if (!isCreator) {
+  const isProfessor = await usersService.isProfessor({ userId, courseId });
+  if (!isProfessor) {
     return Promise.reject(createError.Forbidden());
   }
-  return coursesDb.updateCourse({
-    name,
-    description,
-    courseId,
-  });
+  const metadata = { description, name };
+
+  return coursesDb.updateCourse({ courseId, metadata });
+};
+
+/**
+ * Update course
+ *
+ */
+const publishCourse = async ({ courseId, userId }) => {
+  const isProfessor = await usersService.isProfessor({ userId, courseId });
+  if (!isProfessor) { // TODO: hace falta que sea el creador? publicar guias también?
+    return Promise.reject(createError.Forbidden());
+  }
+  const metadata = { courseStatus: 'published' };
+
+  return coursesDb.updateCourse({ courseId, metadata });
 };
 
 /**
@@ -139,6 +151,7 @@ module.exports = {
   getCourse,
   getUserCourses,
   deleteCourse,
+  publishCourse,
   searchCourses,
   updateCourse
 };

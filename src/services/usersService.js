@@ -104,6 +104,15 @@ const isCreator = async ({
   .then((user) => user.role === ADMIN_ROLE)
   .catch(() => false);
 
+const isProfessor = async ({
+  userId, courseId
+}) => getUser({
+  userId,
+  courseId,
+})
+  .then((user) => ROLES_WITH_EDIT_PERMISSIONS.includes(user.role))
+  .catch(() => false);
+
 const hasEditPermission = async ({
   userId,
   courseId
@@ -122,5 +131,6 @@ module.exports = {
   getUser,
   updateUser,
   isCreator,
+  isProfessor,
   hasEditPermission
 };

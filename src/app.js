@@ -40,6 +40,7 @@ router.use('/courses/:courseId/', courseCheckMiddleware);
 
 router.get('/courses/:courseId', coursesController.getCourse);
 router.put('/courses/:courseId', coursesController.updateCourse);
+router.put('/courses/:courseId/publish', coursesController.publishCourse);
 router.delete('/courses/:courseId', coursesController.deleteCourse);
 
 // Users

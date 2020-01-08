@@ -24,6 +24,14 @@ const deleteCourse = async ({ token, course }) => doRequest({
   token,
 });
 
+const publishCourse = async ({ token, course }) => doRequest({
+  requestUrl: `${baseUrl}/courses/${course.courseId}/publish`,
+  params: {
+    method: 'PUT'
+  },
+  token
+});
+
 const getCourse = async ({ token, course }) => doRequest({
   requestUrl: `${baseUrl}/courses/${course.courseId}`,
   token,
@@ -65,6 +73,7 @@ module.exports = {
   getCourse: errorWrapper(getCourse),
   deleteCourse: errorWrapper(deleteCourse),
   updateCourse: errorWrapper(updateCourse),
+  publishCourse: errorWrapper(publishCourse),
   searchCourses: errorWrapper(searchCourses),
   getUserCourses: errorWrapper(getUserCourses),
   getCourseUsers: errorWrapper(getCourseUsers),

@@ -143,8 +143,8 @@ const deleteCourse = async ({ courseId }) => {
  * Update an specific course
  *
  */
-const updateCourse = async ({ courseId, name, description }) => knex(COURSES_TABLE)
-  .update({ name, description })
+const updateCourse = async ({ courseId, metadata }) => knex(COURSES_TABLE)
+  .update(snakelize(metadata))
   .where(snakelize({ courseId }))
   .returning('*')
   .then(processDbResponse);
