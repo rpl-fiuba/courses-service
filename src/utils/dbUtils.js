@@ -36,5 +36,5 @@ module.exports = {
   camilize,
   snakelize,
   processDbResponse,
-  handleConflict,
+  handleConflict
 };

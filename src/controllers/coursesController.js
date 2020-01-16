@@ -79,12 +79,13 @@ const updateCourse = async (req, res) => {
   const { courseId } = req.params;
   const { name, description } = req.body; // TODO: handlear si mandan uno y otro no
 
-  if (!name || !description) {
+  if (!name && !description) {
     return Promise.reject(createError.BadRequest('name or description not provided'));
   }
+  const metadata = { name, description };
 
   const updatedCourse = await coursesService.updateCourse({
-    courseId, name, description, userId
+    courseId, userId, metadata
   });
 
   return res.status(200).json(updatedCourse[0]);

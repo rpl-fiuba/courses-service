@@ -78,13 +78,12 @@ const deleteCourse = async ({ userId, courseId }) => {
  *
  */
 const updateCourse = async ({
-  courseId, userId, description, name
+  courseId, userId, metadata
 }) => {
   const isProfessor = await usersService.isProfessor({ userId, courseId });
   if (!isProfessor) {
     return Promise.reject(createError.Forbidden());
   }
-  const metadata = { description, name };
 
   return coursesDb.updateCourse({ courseId, metadata });
 };

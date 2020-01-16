@@ -57,23 +57,17 @@ const addUserToCourse = async ({
   password
 }) => {
   if (!validRoles.includes(role)) {
-    return Promise.reject(
-      createError.BadRequest(`Invalid role: ${role}. Valid roles: ${validRoles}`)
-    );
+    return Promise.reject(createError.BadRequest(`Invalid role: ${role}. Valid roles: ${validRoles}`));
   }
 
   const course = await coursesDb.getCourse({ courseId });
 
   if (course.password && course.password !== password) {
-    return Promise.reject(
-      createError.Conflict('The password is invalid')
-    );
+    return Promise.reject(createError.Conflict('The password is invalid'));
   }
 
   return usersDb.addUser({
-    courseId,
-    userId,
-    role
+    courseId, userId, role
   });
 };
 

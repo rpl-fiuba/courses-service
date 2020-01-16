@@ -46,11 +46,8 @@ const getUser = async ({
  *
  */
 const addUser = async ({ userId, courseId, role }) => knex(COURSE_USERS_TABLE)
-  .insert(snakelize({
-    userId,
-    courseId,
-    role,
-  }))
+  .insert(snakelize({ userId, courseId, role }))
+  // TODO: on conflict do nothing
   .catch((err) => handleConflict({ err, resourceName: `User with id ${userId}` }));
 
 /**
