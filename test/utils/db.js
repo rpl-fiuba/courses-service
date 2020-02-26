@@ -16,6 +16,7 @@ const cleanDb = async () => {
   await knex('courses').del();
   await knex('guides').del();
   await knex('course_users').del();
+  await knex('users_activity').del();
 };
 
 module.exports = {

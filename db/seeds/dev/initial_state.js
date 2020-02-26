@@ -1,3 +1,4 @@
+const userActivity = require('../user_activity');
 
 exports.seed = async (knex) => {
   const currentCourses = await knex('courses').select();
@@ -312,4 +313,6 @@ exports.seed = async (knex) => {
   if (!currentGuides.length) {
     await knex('guides').insert(guides);
   }
+
+  await userActivity.addActivityToCourses(knex, courses);
 };

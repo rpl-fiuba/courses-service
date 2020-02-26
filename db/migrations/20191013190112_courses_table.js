@@ -28,7 +28,13 @@ exports.up = (knex) => {
       guide_status  status NOT NULL DEFAULT 'draft',
       PRIMARY KEY (guide_id, course_id)
     );
-    `;
+
+    CREATE TABLE IF NOT EXISTS users_activity(
+      course_id     CHARACTER VARYING(256) NOT NULL,
+      user_id       CHARACTER VARYING(256) NOT NULL,
+      activity_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
 
   return knex.raw(query);
 };
@@ -38,6 +44,7 @@ exports.down = (knex) => {
     DROP TABLE courses;
     DROP TABLE guides;
     DROP TABLE course_users;
+    DROP TABLE users_activity;
     DROP TYPE user_role;
     DROP TYPE status;
   `;

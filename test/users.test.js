@@ -3,8 +3,9 @@ const chai = require('chai');
 const { assert, expect } = chai;
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const requests = require('./utils/usersRequests');
+const courseRequests = require('./utils/coursesRequests');
 const { cleanDb } = require('./utils/db');
-const { addCourseMocks, addCourseUserMocks } = require('./utils/dbMockFactory');
+const { addCourseMocks, addCourseUserMocks, addUsersActivity } = require('./utils/dbMockFactory');
 const mocks = require('./utils/mocks');
 
 chai.use(deepEqualInAnyOrder);
@@ -272,6 +273,118 @@ describe('Users Tests', () => {
       it('status is OK', () => assert.equal(response.status, 200));
 
       it('body has the expected users', () => expect(response.body).to.deep.equalInAnyOrder(userProfiles));
+    });
+  });
+
+  describe('Get Users activity', () => {
+    let courseId;
+    let mockUsers;
+    let expectedResponse;
+
+    beforeEach(async () => {
+      mocks.mockUsersService({ profile: professorProfile });
+
+      // creating course
+      const coursesAndCreators = await addCourseMocks({
+        coursesNumber: 1, creator: professorProfile
+      });
+      const [createdCourse] = coursesAndCreators.courses;
+      courseId = createdCourse.courseId;
+
+      // creating users
+      mockUsers = await addCourseUserMocks({ courseId, usersAmount: 10, role: 'student' });
+      const userIds = mockUsers.map((u) => u.userId);
+
+      // adding users activity
+      const years = [2019, 2018];
+      const months = [2, 1];
+      const days = [15, 11, 10, 4, 2, 1];
+
+      const activities = [];
+      expectedResponse = [];
+
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1;
+      const currentDay = today.getDate();
+      const daysByCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+      const currentExpectedDays = [];
+      for (let day = 1; day < daysByCurrentMonth; day += 1) {
+        if (currentDay !== day) {
+          currentExpectedDays.push({ day, count: 0 });
+        } else {
+          currentExpectedDays.push({ day, count: 1 });
+        }
+      }
+      // saving the current activity day (because the current user makes an action)
+      expectedResponse.push({
+        year: currentYear,
+        months: [{ month: currentMonth, days: currentExpectedDays }]
+      });
+
+      // saving the users activity days
+      years.forEach((year) => {
+        const expectedMonths = [];
+
+        months.forEach((month) => {
+          const expectedDays = [];
+
+          const daysByMonth = new Date(year, month, 0).getDate();
+          for (let day = 1; day < daysByMonth; day += 1) {
+            if (!days.includes(day)) {
+              expectedDays.push({ day, count: 0 });
+            } else {
+              expectedDays.push({ day, count: 10 });
+            }
+          }
+          expectedMonths.push({ month, days: expectedDays });
+
+          days.forEach((day) => {
+            const newDate = new Date(year, month - 1, day);
+
+            userIds.forEach((userId) => {
+              activities.push({
+                user_id: userId, course_id: courseId, activity_date: newDate.toDateString()
+              });
+            });
+          });
+        });
+
+        expectedResponse.push({ year, months: expectedMonths });
+      });
+
+      await addUsersActivity({ activities });
+
+      response = await requests.getUsersActivity({ token, courseId });
+    });
+
+    it('status is OK', () => assert.equal(response.status, 200));
+
+    it('body has the expected activity', () => expect(response.body).to.deep.equal(expectedResponse));
+
+    describe('when an user does some action in the course', () => {
+      beforeEach(async () => {
+        mocks.mockUsersService({ profile: studentProfile });
+        mocks.mockUsersBulk({
+          users: [professorProfile, ...mockUsers],
+          userProfiles: [professorProfile, ...mockUsers]
+        });
+
+        // doing some activity
+        await courseRequests.getCourse({ token, course: { courseId } });
+
+        // increasing the activity count (only in one)
+        const currentDay = (new Date()).getDate();
+        expectedResponse[0].months[0].days.find((dayObj) => dayObj.day === currentDay).count += 1;
+
+        mocks.mockUsersService({ profile: professorProfile });
+        response = await requests.getUsersActivity({ token, courseId });
+      });
+
+      it('status is OK', () => assert.equal(response.status, 200));
+
+      it('body has the expected activity', () => expect(response.body).to.deep.equal(expectedResponse));
     });
   });
 });

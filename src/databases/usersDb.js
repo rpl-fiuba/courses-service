@@ -5,6 +5,7 @@ const configs = require('../configs')();
 const knex = require('knex')(configs.db); // eslint-disable-line
 
 const COURSE_USERS_TABLE = 'course_users';
+const USERS_ACTIVITY_TABLE = 'users_activity';
 
 /**
  * Get users of the course
@@ -62,14 +63,46 @@ const deleteUser = async ({ courseId, userId }) => knex(COURSE_USERS_TABLE)
  * Update an specific user
  *
  */
-const updateUser = async ({ courseId, userId, role }) => knex(COURSE_USERS_TABLE)
-  .update({ role })
-  .where(snakelize({ courseId, userId }));
+const updateUser = async ({ courseId, userId, role }) => (
+  knex(COURSE_USERS_TABLE)
+    .update({ role })
+    .where(snakelize({ courseId, userId }))
+);
+
+/**
+ * Register activity
+ *
+ */
+const registerUserActivity = async ({ courseId, userId }) => (
+  knex(USERS_ACTIVITY_TABLE)
+    .insert(snakelize({ userId, courseId }))
+);
+
+/**
+ * Get users activity
+ *
+ */
+const getUsersActivity = async ({ courseId, userId }) => (
+  knex(USERS_ACTIVITY_TABLE)
+    .select(knex.raw("date_part('year', activity_date) as year, date_part('month', activity_date) as month, date_part('day', activity_date) as day, count(*)"))
+    .where(snakelize({ courseId }))
+    .modify((queryBuilder) => {
+      if (userId) {
+        queryBuilder.where(snakelize({ userId }));
+      }
+    })
+    .orderBy('year', 'desc')
+    .orderBy('month', 'desc')
+    .orderBy('day', 'asc')
+    .groupByRaw('year, month, day')
+);
 
 module.exports = {
-  getUsers,
-  getUser,
   addUser,
   deleteUser,
-  updateUser,
+  getUsersActivity,
+  getUsers,
+  getUser,
+  registerUserActivity,
+  updateUser
 };

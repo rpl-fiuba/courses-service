@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 
 const configs = require('./configs')();
 const errorMiddleware = require('./middlewares/errorMiddleware');
+const userActivityMiddleware = require('./middlewares/userActivityMiddleware');
 const courseCheckMiddleware = require('./middlewares/courseCheckMiddleware');
 const initialMiddleware = require('./middlewares/initialMiddleware');
 const requestLoggerMiddleware = require('./middlewares/requestLoggerMiddleware');
@@ -37,6 +38,7 @@ router.get('/courses', coursesController.getUserCourses);
 router.post('/courses', coursesController.addCourse);
 
 router.use('/courses/:courseId/', courseCheckMiddleware);
+router.use('/courses/:courseId/', userActivityMiddleware);
 
 router.get('/courses/:courseId', coursesController.getCourse);
 router.put('/courses/:courseId', coursesController.updateCourse);
@@ -45,6 +47,7 @@ router.delete('/courses/:courseId', coursesController.deleteCourse);
 
 // Users
 router.get('/courses/:courseId/users', usersController.getUsersFromCourse);
+router.get('/courses/:courseId/users/statistics/activity', usersController.getUsersActivity);
 router.post('/courses/:courseId/users', usersController.addUserToCourse);
 router.delete('/courses/:courseId/users/:userId', usersController.deleteUserFromCourse);
 router.put('/courses/:courseId/users/:userId', usersController.updateUser);

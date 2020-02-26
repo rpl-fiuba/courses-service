@@ -85,8 +85,13 @@ const addCourseMocks = async ({
   };
 };
 
+const addUsersActivity = async ({ activities }) => {
+  await knex('users_activity').insert(activities);
+};
+
 module.exports = {
   addCourseMocks,
   addGuideMocks,
   addCourseUserMocks,
+  addUsersActivity
 };

@@ -40,9 +40,18 @@ const deleteUser = async ({ user, token }) => doRequest({
   token,
 });
 
+const getUsersActivity = async ({ token, courseId }) => doRequest({
+  requestUrl: `${baseUrl}/courses/${courseId}/users/statistics/activity`,
+  params: {
+    method: 'GET',
+  },
+  token
+});
+
 
 module.exports = {
   getUsers: errorWrapper(getUsers),
+  getUsersActivity: errorWrapper(getUsersActivity),
   getUser: errorWrapper(getUser),
   addUser: errorWrapper(addUser),
   deleteUser: errorWrapper(deleteUser),
