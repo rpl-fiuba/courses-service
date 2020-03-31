@@ -59,7 +59,7 @@ const getUsersActivity = async ({ context, courseId }) => {
 
       // if some day there was not activity, then the count of users is 0
       const activityDays = [];
-      for (let day = 1; day < daysByMonth; day += 1) {
+      for (let day = 1; day <= daysByMonth; day += 1) {
         const dayWithActivity = daysWithActivity.find((obj) => obj.day === day);
         if (!dayWithActivity) {
           activityDays.push({ day, count: 0 });

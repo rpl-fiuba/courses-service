@@ -16,6 +16,7 @@ const getGuides = async ({
 }) => knex.select()
   .from(GUIDES_TABLE)
   .where(snakelize({ courseId }))
+  .orderBy('created_at', 'desc')
   .offset(offset || configs.dbDefault.offset)
   .limit(limit || configs.dbDefault.limit)
   .then(processDbResponse)
