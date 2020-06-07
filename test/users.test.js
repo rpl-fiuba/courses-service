@@ -307,7 +307,7 @@ describe('Users Tests', () => {
       const currentYear = today.getFullYear();
       const currentMonth = today.getMonth() + 1;
       const currentDay = today.getDate();
-      const daysByCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
+      const daysByCurrentMonth = new Date(currentYear, currentMonth - 1, 0).getDate();
 
       const currentExpectedDays = [];
       for (let day = 1; day <= daysByCurrentMonth; day += 1) {
@@ -330,7 +330,7 @@ describe('Users Tests', () => {
         months.forEach((month) => {
           const expectedDays = [];
 
-          const daysByMonth = new Date(year, month, 0).getDate();
+          const daysByMonth = new Date(year, month - 1, 0).getDate();
           for (let day = 1; day <= daysByMonth; day += 1) {
             if (!days.includes(day)) {
               expectedDays.push({ day, count: 0 });

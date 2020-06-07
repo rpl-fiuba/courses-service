@@ -16,6 +16,7 @@ const statusController = require('./controllers/statusController');
 const coursesController = require('./controllers/coursesController');
 const usersController = require('./controllers/usersController');
 const guidesController = require('./controllers/guidesController');
+const statisticsController = require('./controllers/statisticsController');
 
 const app = express();
 const { port } = configs.app;
@@ -47,7 +48,7 @@ router.delete('/courses/:courseId', coursesController.deleteCourse);
 
 // Users
 router.get('/courses/:courseId/users', usersController.getUsersFromCourse);
-router.get('/courses/:courseId/users/statistics/activity', usersController.getUsersActivity);
+router.get('/courses/:courseId/users/statistics/activity', statisticsController.getUsersActivity);
 router.post('/courses/:courseId/users', usersController.addUserToCourse);
 router.delete('/courses/:courseId/users/:userId', usersController.deleteUserFromCourse);
 router.put('/courses/:courseId/users/:userId', usersController.updateUser);

@@ -46,19 +46,10 @@ const deleteUserFromCourse = async (req, res) => {
   return res.status(204).json({});
 };
 
-const getUsersActivity = async (req, res) => {
-  const { context } = req;
-  const { courseId } = req.params;
-  const statistics = await usersService.getUsersActivity({ context, courseId });
-
-  return res.status(200).json(statistics);
-};
-
 module.exports = expressify({
   getUsersFromCourse,
   addUserToCourse,
   deleteUserFromCourse,
   getUser,
-  getUsersActivity,
   updateUser,
 });
