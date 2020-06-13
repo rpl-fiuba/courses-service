@@ -93,7 +93,7 @@ const getUsersActivity = async ({ courseId, userId }) => (
     })
     .orderBy('year', 'desc')
     .orderBy('month', 'desc')
-    .orderBy('day', 'asc')
+    .orderBy('day', 'desc')
     .groupByRaw('year, month, day')
 );
 

@@ -309,15 +309,24 @@ describe('Users Tests', () => {
       const currentDay = today.getDate();
       const daysByCurrentMonth = new Date(currentYear, currentMonth - 1, 0).getDate();
 
+      // adding the last day to the user activities
+      const lastDay = new Date(currentYear, currentMonth - 1, currentDay - 1);
+      activities.push({
+        user_id: professorProfile.userId,
+        course_id: courseId,
+        activity_date: lastDay.toDateString()
+      });
+
+      // adding the expected days for the current month
+      // saving the current activity day (because the current user makes an action)
       const currentExpectedDays = [];
       for (let day = 1; day <= daysByCurrentMonth; day += 1) {
-        if (currentDay !== day) {
+        if (![currentDay, currentDay - 1].includes(day)) {
           currentExpectedDays.push({ day, count: 0 });
         } else {
           currentExpectedDays.push({ day, count: 1 });
         }
       }
-      // saving the current activity day (because the current user makes an action)
       expectedResponse.push({
         year: currentYear,
         months: [{ month: currentMonth, days: currentExpectedDays }]
