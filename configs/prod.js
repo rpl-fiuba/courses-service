@@ -9,7 +9,12 @@ module.exports = {
   db: {
     client: 'pg',
     version: '10.10',
-    connection: process.env.DATABASE_URL
+    connection: {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DATABASE
+    }
   },
   dbDefault: {
     limit: 40,
@@ -17,7 +22,10 @@ module.exports = {
   },
   services: {
     usersService: {
-      url: process.env.USERS_SERVICE_URL || 'https://math-learning-users-service.herokuapp.com',
+      url: {
+        protocol: 'https',
+        hostname: process.env.USERS_SERVICE_URL || 'math-learning-users-service.herokuapp.com',
+      },
       paths: {
         auth: 'login',
         users: 'users/profile'
