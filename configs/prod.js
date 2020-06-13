@@ -4,7 +4,7 @@ module.exports = {
   app: {
     protocol: 'http',
     hostname: '0.0.0.0',
-    port: '5001'
+    port: process.env.PORT || '5001'
   },
   db: {
     client: 'pg',
@@ -17,10 +17,7 @@ module.exports = {
   },
   services: {
     usersService: {
-      url: {
-        protocol: 'https',
-        hostname: process.env.USERS_SERVICE_URL || 'math-learning-users-service.herokuapp.com',
-      },
+      url: process.env.USERS_SERVICE_URL || 'https://math-learning-users-service.herokuapp.com',
       paths: {
         auth: 'login',
         users: 'users/profile'
