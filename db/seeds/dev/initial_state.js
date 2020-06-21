@@ -1,6 +1,9 @@
 const userActivity = require('../user_activity');
 
 exports.seed = async (knex) => {
+  return; // No initial seed for now
+
+  /* eslint-disable */
   const currentCourses = await knex('courses').select();
   const currentGuides = await knex('guides').select();
   const currentUsers = await knex('course_users').select();

@@ -44,6 +44,7 @@ router.use('/courses/:courseId/', userActivityMiddleware);
 router.get('/courses/:courseId', coursesController.getCourse);
 router.put('/courses/:courseId', coursesController.updateCourse);
 router.put('/courses/:courseId/publish', coursesController.publishCourse);
+router.post('/courses/:courseId/copy', coursesController.copyCourse);
 router.delete('/courses/:courseId', coursesController.deleteCourse);
 
 // Users

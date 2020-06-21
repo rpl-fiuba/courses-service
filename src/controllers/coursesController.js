@@ -58,6 +58,33 @@ const addCourse = async (req, res) => {
 };
 
 /**
+ * Copy course
+ *
+ */
+const copyCourse = async (req, res) => {
+  const { context } = req;
+  const { userId } = context.user;
+  const { courseId } = req.params;
+  const { name, description, password } = req.body;
+
+  if (!name || !description) {
+    return Promise.reject(createError.BadRequest('name or description have not been provided'));
+  }
+
+  const creatorId = userId;
+  const createdCourse = await coursesService.copyCourse({
+    context,
+    name,
+    password,
+    description,
+    creatorId,
+    sourceCourseId: courseId
+  });
+
+  return res.status(201).json(createdCourse);
+};
+
+/**
  * Delete an specific course
  *
  */
@@ -123,6 +150,7 @@ const getUserCourses = async (req, res) => {
 
 module.exports = expressify({
   addCourse,
+  copyCourse,
   getCourse,
   publishCourse,
   searchCourses,

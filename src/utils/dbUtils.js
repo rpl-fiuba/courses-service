@@ -12,6 +12,9 @@ const camilize = (obj) => {
 };
 
 const snakelize = (obj) => {
+  if (_.isArray(obj)) {
+    return obj.map((item) => snakelize(item));
+  }
   const newObj = {};
 
   Object.keys(obj).forEach((key) => {

@@ -37,6 +37,16 @@ const addGuide = async ({ guide }) => knex
   .catch((err) => handleConflict({ err, resourceName: `Guide with id ${guide.guideId}` }));
 
 /**
+ * Add guides into course
+ *
+ */
+const addGuides = async ({ guides }) => knex
+  .insert(snakelize(guides))
+  .into(GUIDES_TABLE)
+  .returning('*')
+  .then(processDbResponse);
+
+/**
  * Delete an specific guide
  *
  */
@@ -76,9 +86,10 @@ const getGuide = async ({ courseId, guideId }) => knex(GUIDES_TABLE)
   });
 
 module.exports = {
+  addGuide,
+  addGuides,
   getGuides,
   getGuide,
-  addGuide,
   deleteGuide,
   updateGuide,
 };

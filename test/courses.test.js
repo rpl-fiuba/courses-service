@@ -3,7 +3,7 @@ const { assert, expect } = require('chai');
 const requests = require('./utils/coursesRequests');
 const { cleanDb, sanitizeResponse } = require('./utils/db');
 const mocks = require('./utils/mocks');
-const { addCourseMocks, addCourseUserMocks } = require('./utils/dbMockFactory');
+const { addCourseMocks, addCourseUserMocks, addGuideMocks } = require('./utils/dbMockFactory');
 
 process.env.NODE_ENV = 'test';
 
@@ -616,6 +616,116 @@ describe('Course Tests', () => {
 
         it('body has the published', () => assert.deepEqual(sanitizeResponse(response.body[0].courseId), createdCourse.courseId));
       });
+    });
+  });
+
+  describe('Copy course', () => {
+    let name;
+    let description;
+    let password;
+    let createdCourse;
+    let createdGuides;
+    let copydCourseId;
+
+    beforeEach(async () => {
+      name = 'curso';
+      description = 'description';
+      password = 'pass';
+
+      // adding existing mock data
+      const coursesAndCreators = await addCourseMocks({
+        coursesNumber: 1,
+        creator: professorProfile
+      });
+      [createdCourse] = coursesAndCreators.courses;
+      createdGuides = await addGuideMocks({
+        courseId: createdCourse.courseId, guidesAmount: 3
+      });
+
+      // executing request
+      mocks.mockUsersService({ profile: professorProfile });
+
+      response = await requests.copyCourse({
+        course: {
+          name,
+          description,
+          password,
+          courseId: createdCourse.courseId
+        },
+        token
+      });
+      copydCourseId = response.body.courseId;
+    });
+
+    it('should return status CREATED', () => assert.equal(response.status, 201));
+
+    it('should return the course cloned', async () => {
+      const expectedGuides = createdGuides.map((guide) => ({
+        ...guide,
+        guideStatus: 'draft',
+        courseId: copydCourseId,
+      }));
+
+      const expectedCourse = {
+        ...createdCourse,
+        password,
+        name,
+        description,
+        courseId: copydCourseId,
+        courseStatus: 'draft',
+        guides: expectedGuides,
+        users: [{
+          ...professorProfile,
+          role: 'creator'
+        }],
+        professors: [{
+          ...professorProfile,
+          role: 'creator'
+        }]
+      };
+
+      // course should be copied
+      const copydCourse = sanitizeResponse(response.body);
+      copydCourse.guides = sanitizeResponse(copydCourse.guides);
+      assert.deepEqual(copydCourse, expectedCourse);
+    });
+
+    it('get copyd should return the course cloned', async () => {
+      mocks.mockUsersService({ profile: professorProfile });
+      mocks.mockUsersBulk({ users: [professorProfile], userProfiles: [professorProfile] });
+
+      const expectedGuides = createdGuides.map((guide) => ({
+        ...guide,
+        guideStatus: 'draft',
+        courseId: copydCourseId,
+      }));
+
+      const expectedCourse = {
+        ...createdCourse,
+        password,
+        name,
+        description,
+        courseId: copydCourseId,
+        courseStatus: 'draft',
+        guides: expectedGuides,
+        users: [{
+          ...professorProfile,
+          role: 'creator'
+        }],
+        professors: [{
+          ...professorProfile,
+          role: 'creator'
+        }]
+      };
+
+      const getCourseResponse = await requests.getCourse({
+        course: { courseId: copydCourseId }, token
+      });
+
+      // course should be copied
+      const copydCourse = sanitizeResponse(getCourseResponse.body);
+      copydCourse.guides = sanitizeResponse(copydCourse.guides);
+      assert.deepEqual(copydCourse, expectedCourse);
     });
   });
 });

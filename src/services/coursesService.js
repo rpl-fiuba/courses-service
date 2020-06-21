@@ -62,6 +62,28 @@ const addCourse = async ({
 };
 
 /**
+ * Add course
+ *
+ */
+const copyCourse = async ({
+  context, description, name, password, creatorId, sourceCourseId
+}) => {
+  const createdCourse = await addCourse({
+    context, description, name, password, creatorId
+  });
+  const copydGuides = await guidesService.copyCourse({
+    context,
+    sourceCourseId,
+    targetCourseId: createdCourse.courseId
+  });
+
+  return {
+    ...createdCourse,
+    guides: copydGuides
+  };
+};
+
+/**
  * Delete course
  *
  */
@@ -147,6 +169,7 @@ const includeProfessorsToCourses = async ({ context, courses }) => {
 
 module.exports = {
   addCourse,
+  copyCourse,
   getCourse,
   getUserCourses,
   deleteCourse,

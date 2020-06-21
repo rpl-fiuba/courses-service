@@ -67,9 +67,23 @@ const getCourseUsers = async ({ courseId, token }) => doRequest({
   token
 });
 
+const copyCourse = async ({ course, token, }) => doRequest({
+  requestUrl: `${baseUrl}/courses/${course.courseId}/copy`,
+  params: {
+    method: 'POST',
+    body: JSON.stringify({
+      name: course.name,
+      description: course.description,
+      password: course.password
+    }),
+  },
+  token
+});
+
 module.exports = {
   status: errorWrapper(status),
   addCourse: errorWrapper(addCourse),
+  copyCourse: errorWrapper(copyCourse),
   getCourse: errorWrapper(getCourse),
   deleteCourse: errorWrapper(deleteCourse),
   updateCourse: errorWrapper(updateCourse),

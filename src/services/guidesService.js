@@ -42,6 +42,23 @@ const addGuide = async ({
 };
 
 /**
+ * Copy course
+ *
+ */
+const copyCourse = async ({ sourceCourseId, targetCourseId }) => {
+  const sourceGuides = await guidesDb.getGuides({ courseId: sourceCourseId });
+  const targetGuides = sourceGuides.map((guide) => ({
+    name: guide.name,
+    description: guide.description,
+    guideStatus: guide.guideStatus,
+    guideId: guide.guideId,
+    courseId: targetCourseId
+  }));
+
+  return guidesDb.addGuides({ guides: targetGuides });
+};
+
+/**
  * Delete an specific guide
  *
  */
@@ -97,9 +114,10 @@ const doesGuideExists = async ({ courseId, guideId }) => guidesDb.getGuide({ cou
   .catch(() => false);
 
 module.exports = {
+  addGuide,
+  copyCourse,
   getGuides,
   getGuide,
-  addGuide,
   deleteGuide,
   updateGuide,
 };
