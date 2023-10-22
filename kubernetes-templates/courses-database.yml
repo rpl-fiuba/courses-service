@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: courses-db
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: courses-db
+  template:
+    metadata:
+      labels:
+        app: courses-db
+    spec:
+      containers:
+        - image: lorenzogl/courses-db:GIT_SHA_SECRET
+          imagePullPolicy: Always
+          name: courses-db
+          env:
+            - name: ENV_VAR_1
+              value: ENV_VAR_1_VALUE
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: courses-db
+  annotations:
+    dev.okteto.com/auto-ingress: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - name: "courses-db"
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: courses-db
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

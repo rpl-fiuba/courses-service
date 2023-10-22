@@ -1,0 +1,60 @@
+name: Publish Database Docker Image + Deploy to Okteto
+on:
+  push:
+    paths:
+      - '*courses-database.yml'
+      - '*Dockerfile-db'
+    branches: [ master ]
+
+jobs:
+  publish-docker-image-database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: lorenzogl/courses-db
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: ${{ github.sha }}
+          dockerfile: Dockerfile-db
+
+  push-db-okteto-pipeline:
+    needs: publish-docker-image-database
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: Create and populate kubernetes/courses-database.yml file
+        env:
+          MONGO_FULL_URL_SECRET: ${{ secrets.MONGO_URL }}
+          GIT_SHA_SECRET: ${{ github.sha }}
+        run: |
+          touch kubernetes/courses-database.yml
+          sed "s|MONGO_URL_PLACEHOLDER|$MONGO_FULL_URL_SECRET|" kubernetes-templates/courses-database.yml | sed "s|GIT_SHA_SECRET|$GIT_SHA_SECRET|" > kubernetes/courses-database.yml
+          echo "cat kubernetes/courses-database.yml"
+          cat kubernetes/courses-database.yml
+
+          echo "ls -a ."
+          ls -a .
+
+          echo "ls -a ${{ github.workspace }}"
+          ls -a ${{ github.workspace }}
+        shell: bash
+
+
+      - uses: okteto/login@latest
+        with:
+          token: ${{ secrets.OKTETO_TOKEN }}
+
+      - name: "Activate personal namespace"
+        uses: okteto/namespace@latest
+        with:
+          namespace: fiuba-lorenzolgz
+
+      - name: "Create deployment"
+        uses: okteto/apply@latest
+        with:
+          manifest: kubernetes/courses-database.yml

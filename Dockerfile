@@ -1,10 +1,27 @@
 FROM node:10
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
 
+# Create app directory
 WORKDIR /code
-RUN npm install
+
+# Install app dependencies
+COPY package*.json ./
+
+RUN npm ci --omit=dev
+
+# Add src dir
+RUN mkdir src
+
+# Add configs dir
+RUN mkdir configs
+
+# Copy src code
+COPY /src ./src
+
+# Copy config files
+COPY /configs ./configs
+
 EXPOSE 5001
+
 ENV DOCKER true
-CMD ["npm", "run", "start:watch"]
+
+CMD [ "npm", "run", "prod" ]

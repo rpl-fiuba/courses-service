@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: courses-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: courses-service
+  template:
+    metadata:
+      labels:
+        app: courses-service
+    spec:
+      containers:
+        - image: lorenzogl/courses-service:GIT_SHA_SECRET
+          imagePullPolicy: Always
+          name: courses-service
+          env:
+            - name: ENV_VAR_1
+              value: ENV_VAR_1_VALUE
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: courses-service
+  annotations:
+    dev.okteto.com/auto-ingress: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - name: "courses-service"
+      port: 5001
+      targetPort: 5001
+  selector:
+    app: courses-service
