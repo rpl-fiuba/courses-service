@@ -29,7 +29,7 @@ spec:
   type: ClusterIP
   ports:
     - name: "courses-service"
-      port: 5001
+      port: 80
       targetPort: 5001
   selector:
     app: courses-service
