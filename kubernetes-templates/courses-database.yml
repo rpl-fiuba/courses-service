@@ -29,7 +29,7 @@ spec:
   type: ClusterIP
   ports:
     - name: "courses-db"
-      port: 9000
+      port: 80
       targetPort: 9000
   selector:
     app: courses-db
