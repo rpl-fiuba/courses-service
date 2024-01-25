@@ -30,6 +30,6 @@ spec:
   ports:
     - name: "courses-db"
       port: 80
-      targetPort: 9000
+      targetPort: 5432
   selector:
     app: courses-db
