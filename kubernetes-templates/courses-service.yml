@@ -47,6 +47,10 @@ spec:
               value: courses_service
             - name: USERS_SERVICE_URL
               value: learning.net.ar/users-service
+            - name: COURSES_SERVICE_URL
+              value: learning.net.ar/courses-service
+            - name: MATH_SOLVER_URL
+              value: learning.net.ar/math-solver
 
 ---
 apiVersion: v1
