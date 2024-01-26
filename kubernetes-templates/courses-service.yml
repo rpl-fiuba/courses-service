@@ -37,6 +37,16 @@ spec:
           env:
             - name: ENV_VAR_1
               value: ENV_VAR_1_VALUE
+            - name: DB_HOST
+              value: courses-db
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              value: postgres
+            - name: DATABASE
+              value: courses_service
+            - name: USERS_SERVICE_URL
+              value: learning.net.ar/users-service
 
 ---
 apiVersion: v1

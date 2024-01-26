@@ -24,7 +24,7 @@ module.exports = {
     usersService: {
       url: {
         protocol: 'https',
-        hostname: process.env.USERS_SERVICE_URL || 'users-service-fiuba-lorenzolgz.cloud.okteto.net',
+        hostname: process.env.USERS_SERVICE_URL || 'learning.net.ar/users-service',
       },
       paths: {
         auth: 'login',
