@@ -51,6 +51,8 @@ spec:
               value: learning.net.ar/courses-service
             - name: MATH_SOLVER_URL
               value: learning.net.ar/math-solver
+            - name: NODE_ENV
+              value: prod
 
 ---
 apiVersion: v1

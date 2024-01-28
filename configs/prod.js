@@ -25,6 +25,7 @@ module.exports = {
       url: {
         protocol: 'https',
         hostname: process.env.USERS_SERVICE_URL || 'learning.net.ar/users-service',
+        port: 80
       },
       paths: {
         auth: 'login',
