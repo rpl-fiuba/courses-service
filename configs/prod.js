@@ -23,7 +23,7 @@ module.exports = {
   services: {
     usersService: {
       url: {
-        protocol: 'https',
+        protocol: 'http',
         hostname: process.env.USERS_SERVICE_URL || 'learning.net.ar/users-service',
         port: 80
       },
