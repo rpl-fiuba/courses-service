@@ -8,7 +8,7 @@ const usersServiceUrl = url.format(configs.services.usersService.url);
 const authenticate = async ({ context }) => {
   const authPath = configs.services.usersService.paths.auth;
   const authUrl = `${usersServiceUrl}/${authPath}`;
-
+  console.log("Calling users service on url", authUrl)
   const response = await fetch(authUrl, {
     headers: {
       Authorization: context.accessToken
@@ -21,6 +21,7 @@ const authenticate = async ({ context }) => {
 const getUsersAsBulk = async ({ context, userIds }) => {
   const usersPath = configs.services.usersService.paths.users;
   const usersUrl = `${usersServiceUrl}/${usersPath}`;
+  console.log("Calling users service on url", usersUrl)
 
   const response = await fetch(usersUrl, {
     headers: {
