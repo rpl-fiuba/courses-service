@@ -13,6 +13,7 @@ module.exports = async (req, res, next) => {
   }
 
   try {
+    console.log("req.context is", req.context);
     const user = await usersClient.authenticate({ context: req.context });
     req.context.user = user;
     next();
