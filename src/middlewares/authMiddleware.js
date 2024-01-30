@@ -18,6 +18,7 @@ module.exports = async (req, res, next) => {
     req.context.user = user;
     next();
   } catch (err) {
+    console.log("Got error in authMiddleware.js", err)
     next(err);
   }
 };
