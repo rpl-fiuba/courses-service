@@ -44,7 +44,6 @@ spec:
             - name: DB_PASSWORD
               value: postgres
             - name: DATABASE
-              value: courses_service
             - name: USERS_SERVICE_URL
               value: users-service
             - name: COURSES_SERVICE_URL
