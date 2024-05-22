@@ -17,7 +17,7 @@ module.exports = {
     }
   },
   dbDefault: {
-    limit: 300,
+    limit: 500,
     offset: 0,
   },
   services: {
