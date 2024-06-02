@@ -68,3 +68,4 @@ spec:
       targetPort: 5432
   selector:
     app: courses-db
+    
